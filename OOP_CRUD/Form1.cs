@@ -14,29 +14,18 @@ namespace OOP_CRUD
     public partial class Form1 : Form
     {
         public Form frm;
+        public List<object> itemList = new List<object>();
+        public List<object> activeItemList = new List<object>();
 
-        public List<Weapon> weaponList = new List<Weapon>() {
-           // new AutomaticRifle(),
-           // new Bow()
+        public List<Type> itemCreator = new List<Type>() {
+                typeof(AutomaticRifle),
+                typeof(Crossbow),
+                typeof(Bow),
+                typeof(BladedWeapon),
+                typeof(Gunsight),
+                typeof(Bullet),
+                typeof(Arrow),
         };
-
-        public List<WeaponCreator> weaponCreatorList = new List<WeaponCreator>() {
-            new AutomaticRifleCreator(),
-            new BowCreator(),
-            new CrossBowCreator(),
-            new BladeCreator(),
-        };
-
-        public List<AmmunitionCreator> ammunitionCreatorList = new List<AmmunitionCreator>() {
-            new BulletCreator(),
-            new ArrowCreator()
-        };
-
-        public List<GunsightCreator> gunsightCreatorList = new List<GunsightCreator>() {
-            new GunsightCreator()
-        };
-
-
 
         public Form1()
         {
@@ -45,168 +34,139 @@ namespace OOP_CRUD
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            listView1.MultiSelect = false;        
-        }
+            CRUDHelper.ItemsInit(itemList);
+            activeItemList = itemList;
 
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
+            foreach (var item in itemCreator)
+            {
+                string typeString = "";
+                if (item.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault() is DescriptionAttribute descriptionAttribute)
+                    typeString = descriptionAttribute.Description;
+                else
+                    typeString = item.Name;
 
+                comboBox1.Items.Add(typeString);
+            }
+
+            comboBox1.SelectedIndex = 0;
+            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            CRUDHelper.ListRedraw(listView1, activeItemList, "name");
+            listView1.View = View.Details;
         }
 
         private void buttonCreate_Click(object sender, EventArgs e)
         {
-            Random random = new Random();
-            weaponList.Add(weaponCreatorList[ random.Next(0, weaponCreatorList.Count-1)].Create());
-            ListRedraw(listView1, weaponList);
-        }
+            ListView listview = listView1;
 
-        public void ListRedraw(ListView listView, List<Weapon> listOfWeapon)
-        {
-            listView.Clear();
-            for (int i = 0; i < listOfWeapon.Count; i++)
+            ConstructorInfo itemConstructor = itemCreator[comboBox1.SelectedIndex].GetConstructor(new Type[] { });
+            object newitem = itemConstructor.Invoke(new object[] { });
+            itemList.Add(newitem);
+
+            activeItemList = GetActiveList(itemList, checkBox1.Checked, itemCreator[comboBox1.SelectedIndex]);
+            CRUDHelper.ListRedraw(listView1, activeItemList, "name");
+
+            ListViewItem lvi = listview.Items[(activeItemList.Count - 1)];
+            if (lvi != null)
             {
-                var listItem = new ListViewItem();
-                Type itemType = listOfWeapon[i].GetType();
-                listItem.Text = itemType.Name;
-                listView.Items.Add(listItem);
+                listview.Focus();
+                lvi.Selected = true;
+                buttonEdit.PerformClick();
             }
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)
         {
-            if (listView1.SelectedIndices.Count != 0)
+            ListView listview = GetActiveList();
+            if (listview == null)
+                return;
+
+            object item = GetFocusItem();
+            if (item != null)
             {
-                int itemNumber = listView1.SelectedIndices[0];
-                if (itemNumber <weaponList.Count)
-                    weaponList.Remove(weaponList[itemNumber]);
+                CRUDHelper.DeleteItem(item, itemList);
+                activeItemList = GetActiveList(itemList, checkBox1.Checked, itemCreator[comboBox1.SelectedIndex]);
+                CRUDHelper.ListRedraw(listView1, activeItemList, "name");
             }
-            ListRedraw(listView1, weaponList);
         }
 
         private void buttonEdit_Click(object sender, EventArgs e)
         {
-            int itemNumber = -1;
-            if (listView1.SelectedIndices.Count != 0)
-                 itemNumber = listView1.SelectedIndices[0];
-            else
-                return;
+            ListView listview = GetActiveList();
+            if (listview == null)
+                return ;
 
-            //список всех полей объекта
-            FieldInfo[] fields = weaponList[itemNumber].GetType().GetFields();
-
-            //создание формы для редактирования полей
-            frm = new Form
+            object item = GetFocusItem();
+            if (item != null)
             {
-                Size = new System.Drawing.Size(300, 30 * fields.Length),
-                Text = "Form"
-            };
-             
-            string fld = "";
-  
-            for (int i = 0 ; i < fields.Length ; i++)
-            {
-                fld += fields[i].FieldType.Name + " " + fields[i].Name + "\n";
+                FieldInfo[] fields = item.GetType().GetFields(); 
 
-                Label label = new Label
-                {
-                    Location = new Point(15, 25 * (i + 1)),
-                    Width = string.Concat(fields[i].FieldType.Name, " ", fields[i].Name).Length * 6,
-                    Text = string.Concat(fields[i].FieldType.Name ," " , fields[i].Name)
-                };
-                frm.Controls.Add(label);
+                frm = CRUDHelper.CreateForm(item, itemList,SaveControls);
+                frm.ShowDialog();
+                frm.Dispose();
 
-                //Создание для типов значений текстовых полей ввода
-                if (((fields[i].FieldType.IsPrimitive)&&(!fields[i].FieldType.IsEnum))||(fields[i].FieldType.Name == "String"))
-                {
-                    TextBox text = new TextBox
-                    {
-                        Name = fields[i].Name,
-                        Location = new Point(15 + label.Width, 25 * (i + 1)),
-                        Width = frm.Width - ( label.Location.X + label.Width + 30)
-                    };
-
-                    text.Text = fields[i].GetValue(weaponList[itemNumber]).ToString();
-                    frm.Controls.Add(text);
-                }
-
-
-                //Создание выпадающих списков для перечислимых типов
-                if (fields[i].FieldType.IsEnum)
-                {
-                    ComboBox combobox = new ComboBox
-                    {
-                        Name = fields[i].Name,
-                        SelectionStart = 0,
-                        DropDownStyle = ComboBoxStyle.DropDownList,
-                        Location = new Point(15 + label.Width, 25 * (i + 1)),
-                        Width = frm.Width - (label.Location.X + label.Width + 30)
-                    };
-                    combobox.Items.AddRange(fields[i].FieldType.GetEnumNames());
-                    combobox.SelectedIndex = (int)(fields[i].GetValue(weaponList[itemNumber]));
-                    frm.Controls.Add(combobox);
-                }
-
-                //Создание выпадающих списков для перечислимых типов
-                if ((!fields[i].FieldType.IsPrimitive)&&(!fields[i].FieldType.IsEnum)&&(!(fields[i].FieldType.Name == "String")))
-                {
-                    ComboBox combobox = new ComboBox
-                    {
-                        Name = fields[i].Name,
-                        SelectionStart = 0,
-                        DropDownStyle = ComboBoxStyle.DropDownList,
-                        Location = new Point(15 + label.Width, 25 * (i + 1)),
-                        Width = frm.Width - (label.Location.X + label.Width + 30)
-                    };
-                    frm.Controls.Add(combobox);
-                }
-
-
+                CRUDHelper.ListRedraw(listView1, activeItemList, "name");
             }
-
-            frm.FormClosing += SaveControlsToItems;
-            frm.ShowDialog();
-            frm.Dispose();
         }
 
-
-        //сохранение значений контролов в объект (событие)
-        public void SaveControlsToItems(object sender, EventArgs e)
+        //сохранение значений контролов (event)
+        public void SaveControls(object sender, EventArgs e)
         {
-            int itemNumber = -1;
-            if (listView1.SelectedIndices.Count != 0)
-                itemNumber = listView1.SelectedIndices[0];
-            else
+            object item = GetFocusItem();
+            if (item == null)
+            {
                 return;
-
-            FieldInfo[] fields = weaponList[itemNumber].GetType().GetFields();
-
-            string tst = "";
-            foreach (var control in frm.Controls.OfType<TextBox>().Cast<Control>().ToList())  
-            {
-                if (fields.ToList().Where(field => field.Name == control.Name).Count() != 0)
-                {
-                    FieldInfo fi = fields.ToList().Where(field => field.Name == control.Name).First();
-                    var buf = fi.GetValue(weaponList[itemNumber]);
-
-                    try
-                    {
-                        fi.SetValue(weaponList[itemNumber], Convert.ChangeType(control.Text, fi.FieldType));
-                    }
-                    catch
-                    {
-                        fi.SetValue(weaponList[itemNumber], buf);
-                        MessageBox.Show("Incorrect field value");
-                    }
-                }
             }
-
-
-            foreach (var c in frm.Controls.OfType<ComboBox>().Cast<Control>().ToList())
-            {
-
-            }
-
+            CRUDHelper.SaveControlsToItems(item, itemList, frm);     
         }
 
+        public object GetFocusItem()
+        {
+            object item = null;
+            activeItemList = GetActiveList(itemList, checkBox1.Checked, itemCreator[comboBox1.SelectedIndex]);
+
+            if ((listView1!=null) &&(listView1.SelectedIndices.Count != 0))
+            {
+                item = activeItemList[listView1.SelectedIndices[0]];
+            }
+
+            return item;
+        }
+
+        public ListView GetActiveList()
+        {
+            foreach (ListView listview in this.Controls.OfType<ListView>())
+            {
+                if (listview.SelectedIndices.Count != 0)
+                {
+                    return listview;
+                }
+            }
+            return null;
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            activeItemList = GetActiveList(itemList, checkBox1.Checked, itemCreator[comboBox1.SelectedIndex]);
+            CRUDHelper.ListRedraw(listView1, activeItemList, "name");
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            activeItemList = GetActiveList(itemList, checkBox1.Checked, itemCreator[comboBox1.SelectedIndex]);
+            CRUDHelper.ListRedraw(listView1, activeItemList, "name");
+        }
+
+        public  List<object> GetActiveList(List<object> items, bool specificClass, Type classType)
+        {
+            if ( specificClass && (classType != null) )
+            {
+                return items.Where(item => (item.GetType() == classType)).ToList();
+            }
+            else
+            {
+                return items;
+            }
+        }
     }
 }
