@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OOP_CRUD
 {
-    /// <summary>
-    /// Оружие
-    /// </summary>
+    [Description("Оружие")]
     public class Weapon
     {
         public string name;
-        public int weight;
+        public float weight;
         public string material;
         public int durability;
         public int damage;
@@ -27,10 +26,11 @@ namespace OOP_CRUD
         }
     }
 
+    [Description("Боеприпасы")]
     public class Ammunition
     {
         public string name;
-        public int weight;
+        public float weight;
 
         public Ammunition()
         {
@@ -39,6 +39,7 @@ namespace OOP_CRUD
         }
     }
 
+    [Description("Стрела")]
     public class Arrow : Ammunition
     {
         public int shaftLenght;
@@ -51,9 +52,10 @@ namespace OOP_CRUD
         }
     }
 
+    [Description("Пуля")]
     public class Bullet : Ammunition
     {
-        public int caliber;
+        public float caliber;
         public int penetratingAbility;
 
         public Bullet()
@@ -63,6 +65,7 @@ namespace OOP_CRUD
         }
     }
 
+    [Description("Оружие дальнего боя")]
     public class RangedWeapon : Weapon
     {
         public int distance;
@@ -82,6 +85,7 @@ namespace OOP_CRUD
 
     public enum DamageType {None =  0, Slashing = 1, Cutting, Piercing, Crushing};
 
+    [Description("Оружие ближнего боя")]
     public class MelleeWeapon : Weapon
     {
         public int handleLenght;
@@ -96,6 +100,7 @@ namespace OOP_CRUD
         }
     }
 
+    [Description("Клинок")]
     public class BladedWeapon : MelleeWeapon
     {
         public int numberOfBlades;
@@ -110,11 +115,12 @@ namespace OOP_CRUD
         }
     }
 
+    [Description("Огенстрельное оружие")]
     public class Firearm : RangedWeapon
     {
         public int catrigeCapacity;
         public bool isAutomatic;
-        public int caliber;
+        public float caliber;
         public int numberOfBarrels;
 
         public Firearm()
@@ -127,20 +133,24 @@ namespace OOP_CRUD
 
     }
 
+    public enum AimType { None = 0, Laser, Collimator, Optic, Holographic };
+
+    [Description("Прицел")]
     public class Gunsight
     {
         public string name;
-        public string aimType;
+        public AimType aimType;
         public int zoom;
 
         public Gunsight()
         {
             name = "undefined";
-            aimType = " ";
+            aimType = AimType.None;
             zoom = 0;
         }
     }
 
+    [Description("Автоматическая винтовка")]
     public class AutomaticRifle : Firearm
     {
         public BladedWeapon bayonet = null;
@@ -155,6 +165,7 @@ namespace OOP_CRUD
 
     public enum MechanismType{None = 0,NotСollapsible = 1, Collapsible, Folding};
 
+    [Description("Метательное оружие")]
     public class ThrowingWeapon : RangedWeapon
     {
         public MechanismType mechanismType;
@@ -165,6 +176,7 @@ namespace OOP_CRUD
         }
     }
 
+    [Description("Лук")]
     public class Bow : ThrowingWeapon
     {
         public string bowstringType;
@@ -177,6 +189,7 @@ namespace OOP_CRUD
         }
     }
 
+    [Description("Арбалет")]
     public class Crossbow : ThrowingWeapon
     {
         public string bowstringType;
@@ -192,71 +205,63 @@ namespace OOP_CRUD
 
 
 
-
-    public abstract class AmmunitionCreator
+    public interface ICreator
     {
-        public abstract Ammunition Create();
+        object Create();
     }
 
-    public class ArrowCreator : AmmunitionCreator
+    public class ArrowCreator : ICreator
     {
-        public override Ammunition Create()
+        public object Create()
         {
             return new Arrow();
         }
     }
 
-    public class BulletCreator : AmmunitionCreator
+    public class BulletCreator : ICreator
     {
-        public override Ammunition Create()
+        public  object Create()
         {
             return new Bullet();
         }
     }
 
 
-
-    public abstract class WeaponCreator
+    public class AutomaticRifleCreator : ICreator
     {
-        public abstract Weapon Create();
-    }
-
-    public class AutomaticRifleCreator : WeaponCreator
-    {
-        public override Weapon Create()
+        public object Create()
         {
             return new AutomaticRifle();
         }
     }
 
-    public class BladeCreator : WeaponCreator
+    public class BladeCreator : ICreator
     {
-        public override Weapon Create()
+        public object Create()
         {
             return new BladedWeapon();
         }
     }
 
-    public class BowCreator : WeaponCreator
+    public class BowCreator : ICreator
     {
-        public override Weapon Create()
+        public object Create()
         {
             return new Bow();
         }
     }
 
-    public class CrossBowCreator : WeaponCreator
+    public class CrossBowCreator : ICreator
     {
-        public override Weapon Create()
+        public object Create()
         {
             return new Crossbow();
         }
     }
 
-
-    public class GunsightCreator 
+    public class GunsightCreator : ICreator
     {
-        public virtual Gunsight Create()
+        public object Create()
         {
             return new Gunsight();
         }
