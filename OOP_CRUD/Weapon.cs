@@ -10,7 +10,7 @@ namespace OOP_CRUD
     [Description("Оружие")]
     public class Weapon
     {
-        public string name;
+        public string modelName;
         public float weight;
         public string material;
         public int durability;
@@ -18,11 +18,17 @@ namespace OOP_CRUD
 
         public Weapon()
         {
-            name = "undefined";
+            modelName = "undefined";
             weight = 0;
             material = "test";
             durability = 0;
             damage = 0;
+        }
+
+        public override string ToString()
+        {
+            return modelName;
+            //return base.ToString();
         }
     }
 
@@ -36,6 +42,11 @@ namespace OOP_CRUD
         {
             name = "undefined";
             weight = 0;
+        }
+
+        public override string ToString()
+        {
+            return name;
         }
     }
 
@@ -62,6 +73,11 @@ namespace OOP_CRUD
         {
             caliber = 0;
             penetratingAbility = 0;
+        }
+
+        public override string ToString()
+        {
+            return caliber.ToString();
         }
     }
 
@@ -138,15 +154,18 @@ namespace OOP_CRUD
     [Description("Прицел")]
     public class Gunsight
     {
-        public string name;
         public AimType aimType;
         public int zoom;
 
         public Gunsight()
         {
-            name = "undefined";
             aimType = AimType.None;
             zoom = 0;
+        }
+
+        public override string ToString()
+        {
+            return aimType.ToString() + " Gunsight";
         }
     }
 
@@ -203,68 +222,5 @@ namespace OOP_CRUD
         }
     }
 
-
-
-    public interface ICreator
-    {
-        object Create();
-    }
-
-    public class ArrowCreator : ICreator
-    {
-        public object Create()
-        {
-            return new Arrow();
-        }
-    }
-
-    public class BulletCreator : ICreator
-    {
-        public  object Create()
-        {
-            return new Bullet();
-        }
-    }
-
-
-    public class AutomaticRifleCreator : ICreator
-    {
-        public object Create()
-        {
-            return new AutomaticRifle();
-        }
-    }
-
-    public class BladeCreator : ICreator
-    {
-        public object Create()
-        {
-            return new BladedWeapon();
-        }
-    }
-
-    public class BowCreator : ICreator
-    {
-        public object Create()
-        {
-            return new Bow();
-        }
-    }
-
-    public class CrossBowCreator : ICreator
-    {
-        public object Create()
-        {
-            return new Crossbow();
-        }
-    }
-
-    public class GunsightCreator : ICreator
-    {
-        public object Create()
-        {
-            return new Gunsight();
-        }
-    }
 }
 
