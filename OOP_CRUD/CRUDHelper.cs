@@ -17,17 +17,17 @@ namespace OOP_CRUD
             items.AddRange(new List<object>
             {
                 new AutomaticRifle()
-                {name = "AK- 47",weight = 5,butt = true,catrigeCapacity = 30,caliber = 7.62f , numberOfBarrels = 1, distance = 500 , shotsPerMinute = 120 },
+                {modelName = "AK- 47",weight = 5,butt = true,catrigeCapacity = 30,caliber = 7.62f , numberOfBarrels = 1, distance = 500 , shotsPerMinute = 120 },
                 new Crossbow()
-                {name = "Арбалет - 90", shotsPerMinute = 3 , distance = 300 , weight = 2.3f ,  mechanismType = MechanismType.Collapsible },
+                {modelName = "Арбалет - 90", shotsPerMinute = 3 , distance = 300 , weight = 2.3f ,  mechanismType = MechanismType.Collapsible },
                 new Bow()
-                {name = "Лук - 3000", mechanismType = MechanismType.Folding , weight = 1 , distance = 200 , material = "wood" , arcLenght = 50 , shotsPerMinute = 2 , rechargeTime = 10},
+                {modelName = "Лук - 3000", mechanismType = MechanismType.Folding , weight = 1 , distance = 200 , material = "wood" , arcLenght = 50 , shotsPerMinute = 2 , rechargeTime = 10},
                 new BladedWeapon()
-                {name = "Кинжал", material = "" , weight = 0.5f, bladeLenght = 20 , damageType = DamageType.Cutting, handleLenght = 10, numberOfBlades = 1 , range = 1 },
+                {modelName = "Кинжал", material = "" , weight = 0.5f, bladeLenght = 20 , damageType = DamageType.Cutting, handleLenght = 10, numberOfBlades = 1 , range = 1 },
                 new Gunsight()
-                {name = "Оптический прицел", zoom = 4, aimType = AimType.Optic},
+                { zoom = 4, aimType = AimType.Optic},
                 new Bullet()
-                {name = "Бронебойная пуля" , caliber = 7.62f, penetratingAbility = 1, weight = 0.05f },
+                { caliber = 7.62f, penetratingAbility = 1, weight = 0.05f },
                 new Arrow()
                 {name = "Деревянная стрела" , numberOfFeathers = 4, weight = 0.02f , shaftLenght = 80}
             }
@@ -151,7 +151,8 @@ namespace OOP_CRUD
                     form.Controls.Add(combobox);
 
                 }//Создание выпадающих списков для вложенных членов
-                else if ((!fields[i].FieldType.IsPrimitive) && (!fields[i].FieldType.IsEnum) && (!(fields[i].FieldType == typeof(string))))
+                //else if ((!fields[i].FieldType.IsPrimitive) && (!fields[i].FieldType.IsEnum) && (!(fields[i].FieldType == typeof(string))))
+                else if ((fields[i].FieldType.IsClass))
                 {
                     ComboBox combobox = new ComboBox
                     {
@@ -167,9 +168,10 @@ namespace OOP_CRUD
 
                     for (int j = 0; j < suitableItems.Count; j++)
                     {
-                        var nameField = suitableItems[0].GetType().GetField("name");
-                        if (nameField != null)
-                            combobox.Items.Add(nameField.GetValue(suitableItems[j]));
+                        //var nameField = suitableItems[0].GetType().GetField("name");
+                        //if (nameField != null)
+                        //combobox.Items.Add(nameField.GetValue(suitableItems[j]));
+                        combobox.Items.Add(suitableItems[j].ToString());
                     }
 
                     var buf = fields[i].GetValue(item);
@@ -224,6 +226,9 @@ namespace OOP_CRUD
                 {
                     name = nameField.GetValue(items[i]);
                 }
+
+                name = items[i].ToString();
+
 
                 string typeString = ""; 
                 if (itemType.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault() is DescriptionAttribute descriptionAttribute)
