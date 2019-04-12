@@ -26,7 +26,7 @@ namespace OOP_CRUD
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new CRUDForm(types));
+            Application.Run(new CRUDForm(types, new CRUDHelper()));
         }
     }
 }
