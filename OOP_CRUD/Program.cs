@@ -14,9 +14,19 @@ namespace OOP_CRUD
         [STAThread]
         static void Main()
         {
+            List<Type> types = new List<Type>(){
+                typeof(AutomaticRifle),
+                typeof(Crossbow),
+                typeof(Bow),
+                typeof(BladedWeapon),
+                typeof(Gunsight),
+                typeof(Bullet),
+                typeof(Arrow),
+            }; 
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new CRUDForm(types));
         }
     }
 }
