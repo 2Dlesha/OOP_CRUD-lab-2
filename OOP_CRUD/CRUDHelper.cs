@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace OOP_CRUD
 {
-    class CRUDHelper
+    public class CRUDHelper
     {
-        public static void ItemsInit(List<Object> items)
+        public void ItemsInit(List<Object> items)
         {
             items.AddRange(new List<object>
             {
@@ -34,7 +34,7 @@ namespace OOP_CRUD
             );
         }
 
-        public static void SaveControlsToItems(Object item, List<Object> items, Form form)
+        public void SaveControlsToItems(Object item, List<Object> items, Form form)
         {
             if ((form == null) || (item == null) || (items == null))
                 return;
@@ -50,6 +50,25 @@ namespace OOP_CRUD
                     try
                     {
                         fi.SetValue(item, Convert.ChangeType(control.Text, fi.FieldType));
+                    }
+                    catch
+                    {
+                        fi.SetValue(item, buf);
+                        MessageBox.Show(fi.Name + ": Incorrect field value");
+                    }
+                }
+            }
+
+            //из текста в значение
+            foreach (var control in form.Controls.OfType<CheckBox>().ToList())
+            {
+                if (fields.ToList().Where(field => field.Name == control.Name).Count() != 0)
+                {
+                    FieldInfo fi = fields.ToList().Where(field => field.Name == control.Name).First();
+                    var buf = fi.GetValue(item);
+                    try
+                    {
+                        fi.SetValue(item, control.Checked);
                     }
                     catch
                     {
@@ -99,16 +118,20 @@ namespace OOP_CRUD
             }
         }
 
-        public static Form CreateForm(Object item, List<Object> items, EventHandler saveEvent)
+        public Form CreateForm(Object item, List<Object> items, EventHandler saveEvent)
         {
             //список всех полей объекта
-            FieldInfo[] fields = item.GetType().GetFields(); 
+            FieldInfo[] fields = item.GetType().GetFields();
+            const int controlHeight = 25;
+            const int formWidth = 350;
+
 
             //создание формы для редактирования полей
             Form form = new Form
             {
                 Text = item.GetType().ToString(),
-                Size = new System.Drawing.Size(350, 60 + 25 * (fields.Length + 2))
+                Size = new Size(formWidth, 60 + controlHeight * (fields.Length + 2)),
+                StartPosition = FormStartPosition.CenterScreen
             };
 
             for (int i = 0; i < fields.Length; i++)
@@ -116,24 +139,39 @@ namespace OOP_CRUD
                 //надпись содержащая тип и имя поля
                 Label label = new Label
                 {
-                    Location = new Point(15, 25 * (i + 1)),
-                    Width = string.Concat(fields[i].FieldType.Name, " ", fields[i].Name).Length * 7,
-                    Text = string.Concat(fields[i].FieldType.Name, " ", fields[i].Name)
+                    Location = new Point(15, controlHeight * (i + 1)),
+                    Text = string.Concat(fields[i].FieldType.Name, " ", fields[i].Name),
+                    Width = string.Concat(fields[i].FieldType.Name, " ", fields[i].Name).Length * 7,           
                 };
 
                 form.Controls.Add(label);
 
+                Type fieldType = fields[i].FieldType;
                 //Создание для типов значений текстовых полей ввода и их заполнение
-                if ( ((fields[i].FieldType.IsPrimitive) && (!fields[i].FieldType.IsEnum))  ||  (fields[i].FieldType == typeof(string)) )
+                if (((fieldType.IsPrimitive) && (!fieldType.IsEnum))  ||  (fieldType == typeof(string)) )
                 {
-                    TextBox text = new TextBox
+                    if (fieldType == typeof(bool))
                     {
-                        Name = fields[i].Name,
-                        Location = new Point(15 + label.Width, 25 * (i + 1)),
-                        Width = form.Width - (label.Location.X + label.Width + 30),
-                        Text = fields[i].GetValue(item).ToString()
-                    };
-                    form.Controls.Add(text);
+                        CheckBox radioButton = new CheckBox
+                        {
+                            Name = fields[i].Name,
+                            Text = "Yes",
+                            Location = new Point(15 + label.Width, controlHeight * (i + 1)),
+                            Checked = (bool)fields[i].GetValue(item),
+                        };
+                        form.Controls.Add(radioButton);
+                    }
+                    else
+                    {
+                        TextBox text = new TextBox
+                        {
+                            Name = fields[i].Name,
+                            Location = new Point(15 + label.Width, controlHeight * (i + 1)),
+                            Width = form.Width - (label.Location.X + label.Width + 30),
+                            Text = fields[i].GetValue(item).ToString()
+                        };
+                        form.Controls.Add(text);
+                    }
 
                 }//Создание выпадающих списков для перечислимых типов
                 else if (fields[i].FieldType.IsEnum)
@@ -143,7 +181,7 @@ namespace OOP_CRUD
                         Name = fields[i].Name,
                         SelectionStart = 0,
                         DropDownStyle = ComboBoxStyle.DropDownList,
-                        Location = new Point(15 + label.Width, 25 * (i + 1)),
+                        Location = new Point(15 + label.Width, controlHeight * (i + 1)),
                         Width = form.Width - (label.Location.X + label.Width + 30)
                     };
                     combobox.Items.AddRange(fields[i].FieldType.GetEnumNames());
@@ -151,7 +189,6 @@ namespace OOP_CRUD
                     form.Controls.Add(combobox);
 
                 }//Создание выпадающих списков для вложенных членов
-                //else if ((!fields[i].FieldType.IsPrimitive) && (!fields[i].FieldType.IsEnum) && (!(fields[i].FieldType == typeof(string))))
                 else if ((fields[i].FieldType.IsClass))
                 {
                     ComboBox combobox = new ComboBox
@@ -159,7 +196,7 @@ namespace OOP_CRUD
                         Name = fields[i].Name,
                         SelectionStart = 0,
                         DropDownStyle = ComboBoxStyle.DropDownList,
-                        Location = new Point(15 + label.Width, 25 * (i + 1)),
+                        Location = new Point(15 + label.Width, controlHeight * (i + 1)),
                         Width = form.Width - (label.Location.X + label.Width + 30)
                     };
 
@@ -168,9 +205,6 @@ namespace OOP_CRUD
 
                     for (int j = 0; j < suitableItems.Count; j++)
                     {
-                        //var nameField = suitableItems[0].GetType().GetField("name");
-                        //if (nameField != null)
-                        //combobox.Items.Add(nameField.GetValue(suitableItems[j]));
                         combobox.Items.Add(suitableItems[j].ToString());
                     }
 
@@ -198,7 +232,7 @@ namespace OOP_CRUD
             {
                 Name = "btnSave",
                 Text = "Save",
-                Location = new Point(form.Width / 2 - (form.Width / 8), (fields.Length + 1) * 25),
+                Location = new Point(form.Width / 2 - (form.Width / 8), (fields.Length + 1) * controlHeight),
                 Width = form.Width / 4,
                 DialogResult = DialogResult.OK,
             };
@@ -209,44 +243,29 @@ namespace OOP_CRUD
             return form;
         }
 
-
-        public static void ListRedraw(ListView listView, List<Object> items ,string fieldWithName)
+        public void ListRedraw(ListView listView, List<Object> items )
         {
             listView.Clear();
-            listView.Columns.Add("Тип",145);
-            listView.Columns.Add("Название", 145);
+            listView.Columns.Add("Type",145);
+            listView.Columns.Add("Name", 145);
 
             for (int i = 0; i < items.Count; i++)
             {
                 Type itemType = items[i].GetType();
-                object name = String.Empty;
+                object name = items[i].ToString();
 
-                var nameField = items[i].GetType().GetField(fieldWithName);
-                if (nameField != null)
-                {
-                    name = nameField.GetValue(items[i]);
-                }
-
-                name = items[i].ToString();
-
-
-                string typeString = ""; 
+                string typeString = itemType.Name; 
                 if (itemType.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault() is DescriptionAttribute descriptionAttribute)
                 {
                     typeString = descriptionAttribute.Description;
                 }
-                else
-                {
-                    typeString = itemType.Name;
-                }
 
                 var listItem = new ListViewItem(new string[]{ typeString , name.ToString() });
-
                 listView.Items.Add(listItem);
             }
         }
 
-        public static void DeleteItem(Object item, List<Object> items)
+        public void DeleteItem(Object item, List<Object> items)
         {
             //список объектов из общего списка
             //у которых среди полей
@@ -259,11 +278,8 @@ namespace OOP_CRUD
             {
                 foreach (var fld in owner.GetType().GetFields().Where(fld => (fld.FieldType == item.GetType())).ToList())
                 {
-
                     if ((fld.GetValue(owner) != null) && (fld.GetValue(owner).Equals(item)))
-                    {
                         fld.SetValue(owner, null);
-                    }
                 }
             }
 
