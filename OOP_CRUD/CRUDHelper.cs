@@ -10,7 +10,16 @@ using System.Windows.Forms;
 
 namespace OOP_CRUD
 {
-    public class CRUDHelper
+    public interface ICRUDHelper
+    {
+        void ItemsInit(List<Object> items);
+        void SaveControlsToItems(Object item, List<Object> items, Form form);
+        Form CreateForm(Object item, List<Object> items);
+        void ListRedraw(Object sender, List<Object> items);
+        void DeleteItem(Object item, List<Object> items);
+    }
+
+    public class CRUDHelper: ICRUDHelper
     {
         public void ItemsInit(List<Object> items)
         {
@@ -118,7 +127,7 @@ namespace OOP_CRUD
             }
         }
 
-        public Form CreateForm(Object item, List<Object> items, EventHandler saveEvent)
+        public Form CreateForm(Object item, List<Object> items)
         {
             //список всех полей объекта
             FieldInfo[] fields = item.GetType().GetFields();
@@ -237,14 +246,24 @@ namespace OOP_CRUD
                 DialogResult = DialogResult.OK,
             };
 
-            btn.Click += saveEvent;
+            EventHandler eventForSave = (object sender, EventArgs e) =>
+            {
+                Button button = (Button)sender;
+                Form eventForm = button.FindForm();
+
+                if ((item != null) && (eventForm != null))
+                    SaveControlsToItems(item, items, eventForm);
+            };
+
+            btn.Click += eventForSave;
             form.Controls.Add(btn);
 
             return form;
         }
 
-        public void ListRedraw(ListView listView, List<Object> items )
+        public void ListRedraw(Object sender, List<Object> items )
         {
+            ListView listView = (ListView)sender;
             listView.Clear();
             listView.Columns.Add("Type",145);
             listView.Columns.Add("Name", 145);
@@ -255,9 +274,9 @@ namespace OOP_CRUD
                 object name = items[i].ToString();
 
                 string typeString = itemType.Name; 
-                if (itemType.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault() is DescriptionAttribute descriptionAttribute)
+                if (itemType.GetCustomAttributes(typeof(DisplayNameAttribute), false).FirstOrDefault() is DisplayNameAttribute displayNameAttribute)
                 {
-                    typeString = descriptionAttribute.Description;
+                    typeString = displayNameAttribute.DisplayName;
                 }
 
                 var listItem = new ListViewItem(new string[]{ typeString , name.ToString() });
@@ -272,17 +291,18 @@ namespace OOP_CRUD
             //есть поле с типом удаляемого объекта или его родительским типом
             var ownerList = items.Where(itm => (itm.GetType()
             .GetFields()
-            .Where(fld => ((fld.FieldType == item.GetType() || fld.FieldType.BaseType == item.GetType())))).ToList().Count > 0);
+            .Where(fld => ((fld.FieldType == item.GetType() || fld.FieldType.BaseType == item.GetType())))).ToList().Count > 0).ToList();
 
             foreach (var owner in ownerList)
             {
                 foreach (var fld in owner.GetType().GetFields().Where(fld => (fld.FieldType == item.GetType())).ToList())
                 {
                     if ((fld.GetValue(owner) != null) && (fld.GetValue(owner).Equals(item)))
+                    {
                         fld.SetValue(owner, null);
+                    }
                 }
             }
-
             items.Remove(item);
         }
     }
