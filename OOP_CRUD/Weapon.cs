@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OOP_CRUD
 {
-    [Description("Оружие")]
+    [DisplayName("Оружие")]
     public class Weapon
     {
         public string modelName;
@@ -32,7 +32,7 @@ namespace OOP_CRUD
         }
     }
 
-    [Description("Боеприпасы")]
+    [DisplayName("Боеприпасы")]
     public class Ammunition
     {
         public string name;
@@ -50,7 +50,7 @@ namespace OOP_CRUD
         }
     }
 
-    [Description("Стрела")]
+    [DisplayName("Стрела")]
     public class Arrow : Ammunition
     {
         public int shaftLenght;
@@ -63,7 +63,7 @@ namespace OOP_CRUD
         }
     }
 
-    [Description("Пуля")]
+    [DisplayName("Пуля")]
     public class Bullet : Ammunition
     {
         public float caliber;
@@ -81,10 +81,11 @@ namespace OOP_CRUD
         }
     }
 
-    [Description("Оружие дальнего боя")]
+    [DisplayName("Оружие дальнего боя")]
     public class RangedWeapon : Weapon
     {
         public int distance;
+        [Description("Aggregation")]
         public Ammunition ammunition = null;
         public int rechargeTime;
         public int shotsPerMinute;
@@ -101,7 +102,7 @@ namespace OOP_CRUD
 
     public enum DamageType {None =  0, Slashing = 1, Cutting, Piercing, Crushing};
 
-    [Description("Оружие ближнего боя")]
+    [DisplayName("Оружие ближнего боя")]
     public class MelleeWeapon : Weapon
     {
         public int handleLenght;
@@ -116,7 +117,7 @@ namespace OOP_CRUD
         }
     }
 
-    [Description("Клинок")]
+    [DisplayName("Клинок")]
     public class BladedWeapon : MelleeWeapon
     {
         public int numberOfBlades;
@@ -131,7 +132,7 @@ namespace OOP_CRUD
         }
     }
 
-    [Description("Огенстрельное оружие")]
+    [DisplayName("Огенстрельное оружие")]
     public class Firearm : RangedWeapon
     {
         public int catrigeCapacity;
@@ -151,7 +152,7 @@ namespace OOP_CRUD
 
     public enum AimType { None = 0, Laser, Collimator, Optic, Holographic };
 
-    [Description("Прицел")]
+    [DisplayName("Прицел")]
     public class Gunsight
     {
         public AimType aimType;
@@ -169,11 +170,13 @@ namespace OOP_CRUD
         }
     }
 
-    [Description("Автоматическая винтовка")]
+    [DisplayName("Автоматическая винтовка")]
     public class AutomaticRifle : Firearm
     {
+
         public BladedWeapon bayonet = null;
         public bool butt;
+        [Description("Aggregation")]
         public Gunsight gunsight = null;
 
         public AutomaticRifle()
@@ -184,7 +187,7 @@ namespace OOP_CRUD
 
     public enum MechanismType{None = 0,NotСollapsible = 1, Collapsible, Folding};
 
-    [Description("Метательное оружие")]
+    [DisplayName("Метательное оружие")]
     public class ThrowingWeapon : RangedWeapon
     {
         public MechanismType mechanismType;
@@ -195,7 +198,7 @@ namespace OOP_CRUD
         }
     }
 
-    [Description("Лук")]
+    [DisplayName("Лук")]
     public class Bow : ThrowingWeapon
     {
         public string bowstringType;
@@ -208,10 +211,11 @@ namespace OOP_CRUD
         }
     }
 
-    [Description("Арбалет")]
+    [DisplayName("Арбалет")]
     public class Crossbow : ThrowingWeapon
     {
         public string bowstringType;
+        [Description("Aggregation")]
         public Gunsight gunsight = null;
         public string triggerType;
 
