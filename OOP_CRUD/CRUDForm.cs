@@ -13,31 +13,29 @@ namespace OOP_CRUD
 {
     public partial class CRUDForm : Form
     {
-        public CRUDHelper CRUDAssistant = null;
+        public ICRUDHelper CRUDAssistant = null;
         public Form editForm = null;
         public List<object> itemList = new List<object>();
         public List<object> activeItemList = new List<object>();
-
         public List<Type> itemCreator = new List<Type>();
 
-        public CRUDForm(List<Type> availibleTypes, CRUDHelper CRUDHelper)
+        public CRUDForm(List<Type> availibleTypes, ICRUDHelper CRUDHelper)
         {
             InitializeComponent();
             CRUDAssistant = CRUDHelper;
             CRUDAssistant.ItemsInit(itemList);
+            activeItemList = itemList;
             itemCreator = availibleTypes;
         }
 
         private void CRUDForm_Load(object sender, EventArgs e)
         {
-            activeItemList = itemList;
-
             foreach (var item in itemCreator)
             {
                 string typeString = item.Name; 
 
-                if (item.GetCustomAttributes(typeof(DescriptionAttribute), false).FirstOrDefault() is DescriptionAttribute descriptionAttribute)
-                    typeString = descriptionAttribute.Description;
+                if (item.GetCustomAttributes(typeof(DisplayNameAttribute), false).FirstOrDefault() is DisplayNameAttribute displayNameAttribute)
+                    typeString = displayNameAttribute.DisplayName;
 
                 comboBoxTypes.Items.Add(typeString);
             }
@@ -83,19 +81,11 @@ namespace OOP_CRUD
             object item = GetFocusItem();
             if (item != null)
             {
-                editForm = CRUDAssistant.CreateForm(item, itemList,SaveControls);
+                editForm = CRUDAssistant.CreateForm(item, itemList);
                 editForm.ShowDialog();
                 editForm.Dispose();
                 CRUDAssistant.ListRedraw(itemsListView, activeItemList);
             }
-        }
-
-        //сохранение значений контролов (event)
-        public void SaveControls(object sender, EventArgs e)
-        {
-            object item = GetFocusItem();
-            if (item != null)
-                CRUDAssistant.SaveControlsToItems(item, itemList, editForm);
         }
 
         public object GetFocusItem()
