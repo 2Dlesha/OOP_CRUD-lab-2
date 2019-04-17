@@ -26,21 +26,35 @@ namespace OOP_CRUD
             items.AddRange(new List<object>
             {
                 new AutomaticRifle()
-                {modelName = "AK- 47",weight = 5,butt = true,catrigeCapacity = 30,caliber = 7.62f , numberOfBarrels = 1, distance = 500 , shotsPerMinute = 120 },
+                {ModelName = "AK- 47",Weight = 5,Butt = true,CatrigeCapacity = 30,Caliber = 7.62f , NumberOfBarrels = 1, Distance = 500 , ShotsPerMinute = 120 },
                 new Crossbow()
-                {modelName = "Арбалет - 90", shotsPerMinute = 3 , distance = 300 , weight = 2.3f ,  mechanismType = MechanismType.Collapsible },
+                {ModelName = "Арбалет - 90", ShotsPerMinute = 3 , Distance = 300 , Weight = 2.3f ,  MechanismType = MechanismType.Collapsible },
                 new Bow()
-                {modelName = "Лук - 3000", mechanismType = MechanismType.Folding , weight = 1 , distance = 200 , material = "wood" , arcLenght = 50 , shotsPerMinute = 2 , rechargeTime = 10},
+                {ModelName = "Лук - 3000", MechanismType = MechanismType.Folding , Weight = 1 , Distance = 200 , Material = "wood" , ArcLenght = 50 , ShotsPerMinute = 2 , RechargeTime = 10},
                 new BladedWeapon()
-                {modelName = "Кинжал", material = "" , weight = 0.5f, bladeLenght = 20 , damageType = DamageType.Cutting, handleLenght = 10, numberOfBlades = 1 , range = 1 },
+                {ModelName = "Кинжал", Material = "" , Weight = 0.5f, BladeLenght = 20 , DamageType = DamageType.Cutting, HandleLenght = 10, NumberOfBlades = 1 , Range = 1 },
                 new Gunsight()
-                { zoom = 4, aimType = AimType.Optic},
+                { Zoom = 4, AimType = AimType.Optic},
                 new Bullet()
-                { caliber = 7.62f, penetratingAbility = 1, weight = 0.05f },
+                { Caliber = 7.62f, PenetratingAbility = 1, Weight = 0.05f },
                 new Arrow()
-                {name = "Деревянная стрела" , numberOfFeathers = 4, weight = 0.02f , shaftLenght = 80}
+                {Name = "Деревянная стрела" , NumberOfFeathers = 4, Weight = 0.02f , ShaftLenght = 80}
             }
             );
+        }
+
+        private void TrySetValue(PropertyInfo propertyInfo, object item, object value)
+        {
+            var buf = propertyInfo.GetValue(item);
+            try
+            {
+                propertyInfo.SetValue(item, Convert.ChangeType(value, propertyInfo.PropertyType));
+            }
+            catch
+            {
+                propertyInfo.SetValue(item, buf);
+                MessageBox.Show(propertyInfo.Name + ": Incorrect field value");
+            }
         }
 
         public void SaveControlsToItems(Object item, List<Object> items, Form form)
@@ -48,23 +62,14 @@ namespace OOP_CRUD
             if ((form == null) || (item == null) || (items == null))
                 return;
 
-            FieldInfo[] fields = item.GetType().GetFields();
+            PropertyInfo[] fields = item.GetType().GetProperties();
             //из текста в значение
             foreach (var control in form.Controls.OfType<TextBox>().ToList())
             {
                 if (fields.ToList().Where(field => field.Name == control.Name).Count() != 0)
                 {
-                    FieldInfo fi = fields.ToList().Where(field => field.Name == control.Name).First();
-                    var buf = fi.GetValue(item);
-                    try
-                    {
-                        fi.SetValue(item, Convert.ChangeType(control.Text, fi.FieldType));
-                    }
-                    catch
-                    {
-                        fi.SetValue(item, buf);
-                        MessageBox.Show(fi.Name + ": Incorrect field value");
-                    }
+                    PropertyInfo fi = fields.ToList().Where(field => field.Name == control.Name).First();
+                    TrySetValue(fi, item, control.Text);
                 }
             }
 
@@ -73,17 +78,8 @@ namespace OOP_CRUD
             {
                 if (fields.ToList().Where(field => field.Name == control.Name).Count() != 0)
                 {
-                    FieldInfo fi = fields.ToList().Where(field => field.Name == control.Name).First();
-                    var buf = fi.GetValue(item);
-                    try
-                    {
-                        fi.SetValue(item, control.Checked);
-                    }
-                    catch
-                    {
-                        fi.SetValue(item, buf);
-                        MessageBox.Show(fi.Name + ": Incorrect field value");
-                    }
+                    PropertyInfo fi = fields.ToList().Where(field => field.Name == control.Name).First();
+                    TrySetValue(fi, item, control.Checked);
                 }
             }
 
@@ -92,13 +88,13 @@ namespace OOP_CRUD
             {
                 if (fields.ToList().Where(field => field.Name == control.Name).Count() != 0)
                 {
-                    FieldInfo fi = fields.ToList().Where(field => field.Name == control.Name).First();
+                    PropertyInfo fi = fields.ToList().Where(field => field.Name == control.Name).First();
                     var buf = fi.GetValue(item);
 
                     if (control.SelectedIndex == -1)
                         continue;
 
-                    if (fi.FieldType.IsEnum)
+                    if (fi.PropertyType.IsEnum)
                     {
                         try
                         {
@@ -112,7 +108,7 @@ namespace OOP_CRUD
                     }
                     else
                     {
-                        List<object> suitableItems = items.Where(sitem => ((sitem.GetType() == fi.FieldType) || (sitem.GetType().BaseType == fi.FieldType))).ToList();
+                        List<object> suitableItems = items.Where(sitem => ((sitem.GetType() == fi.PropertyType) || (sitem.GetType().BaseType == fi.PropertyType))).ToList();
                         try
                         {
                             fi.SetValue(item, suitableItems[control.SelectedIndex]);
@@ -127,10 +123,88 @@ namespace OOP_CRUD
             }
         }
 
+        private Label CreateLabel(string name, Point point)
+        {
+            Label label = new Label();
+            label.Location = point;
+            label.Text = name;
+            label.Width = name.Length * 7;      
+            return label;
+        }
+
+        private CheckBox CreateCheckBox(string name, Point point, bool value)
+        {
+
+            CheckBox checkBox = new CheckBox();
+            checkBox.Name = name;
+            checkBox.Text = "Yes";
+            checkBox.Location = point;
+            checkBox.Checked = value;
+            return checkBox;
+        }
+
+        private TextBox CreateTextBox(string name,Point point, int width,string value)
+        {
+            TextBox textBox = new TextBox();
+            textBox.Name = name;
+            textBox.Location = point;
+            textBox.Width = width;
+            textBox.Text = value;
+            return textBox;
+        }
+
+        private ComboBox CreateComboBox(string name, Point point, int width, string[] values, int currentValue)
+        {
+            ComboBox combobox = new ComboBox();
+            combobox.Name = name;
+            combobox.SelectionStart = 0;
+            combobox.DropDownStyle = ComboBoxStyle.DropDownList;
+            combobox.Location = point;
+            combobox.Width = width;
+            combobox.Items.AddRange(values);
+            combobox.SelectedIndex = currentValue;
+            return combobox;
+        }
+
+        private ComboBox CreateComboBox(string name, Point point, int width,Type itemType ,Object currentItem , List<Object> allItems)
+        {
+
+            ComboBox combobox = new ComboBox();
+            combobox.Name = name;
+            combobox.SelectionStart = 0;
+            combobox.DropDownStyle = ComboBoxStyle.DropDownList;
+            combobox.Location = point;
+            combobox.Width = width;
+
+            //список объектов удовлетворяющих типу поля
+            List<object> suitableItems = allItems.Where(s_item => ((s_item.GetType() == itemType) || (s_item.GetType().BaseType == itemType))).ToList();
+
+            for (int j = 0; j < suitableItems.Count; j++)
+            {
+                combobox.Items.Add(suitableItems[j].ToString());
+            }
+
+            int index = -1;
+            if (currentItem != null)
+            {
+                for (int j = 0; j < suitableItems.Count; j++)
+                {
+                    if (currentItem.Equals(suitableItems[j]))
+                    {
+                        index = j;
+                        break;
+                    }
+                }
+                combobox.SelectedIndex = index;
+            }
+            combobox.SelectedIndex = index;
+            return combobox;
+        }
+
         public Form CreateForm(Object item, List<Object> items)
         {
             //список всех полей объекта
-            FieldInfo[] fields = item.GetType().GetFields();
+            PropertyInfo[] fields = item.GetType().GetProperties();
             const int controlHeight = 25;
             const int formWidth = 350;
 
@@ -145,93 +219,51 @@ namespace OOP_CRUD
 
             for (int i = 0; i < fields.Length; i++)
             {
-                //надпись содержащая тип и имя поля
-                Label label = new Label
-                {
-                    Location = new Point(15, controlHeight * (i + 1)),
-                    Text = string.Concat(fields[i].FieldType.Name, " ", fields[i].Name),
-                    Width = string.Concat(fields[i].FieldType.Name, " ", fields[i].Name).Length * 7,           
-                };
 
+                Label label = CreateLabel(string.Concat(fields[i].PropertyType.Name, " ", fields[i].Name),
+                                            new Point(15, controlHeight * (i + 1)));
                 form.Controls.Add(label);
 
-                Type fieldType = fields[i].FieldType;
+                Type fieldType = fields[i].PropertyType;
                 //Создание для типов значений текстовых полей ввода и их заполнение
                 if (((fieldType.IsPrimitive) && (!fieldType.IsEnum))  ||  (fieldType == typeof(string)) )
                 {
                     if (fieldType == typeof(bool))
                     {
-                        CheckBox radioButton = new CheckBox
-                        {
-                            Name = fields[i].Name,
-                            Text = "Yes",
-                            Location = new Point(15 + label.Width, controlHeight * (i + 1)),
-                            Checked = (bool)fields[i].GetValue(item),
-                        };
-                        form.Controls.Add(radioButton);
+                        CheckBox checkBox = CreateCheckBox(fields[i].Name,
+                                                            new Point(15 + label.Width,
+                                                            controlHeight * (i + 1)),
+                                                            (bool)fields[i].GetValue(item));
+                        form.Controls.Add(checkBox);
                     }
                     else
                     {
-                        TextBox text = new TextBox
-                        {
-                            Name = fields[i].Name,
-                            Location = new Point(15 + label.Width, controlHeight * (i + 1)),
-                            Width = form.Width - (label.Location.X + label.Width + 30),
-                            Text = fields[i].GetValue(item).ToString()
-                        };
+                        TextBox text = CreateTextBox(fields[i].Name, 
+                                                       new Point(15 + label.Width, controlHeight * (i + 1)),
+                                                       form.Width - (label.Location.X + label.Width + 30),
+                                                       fields[i].GetValue(item).ToString());
                         form.Controls.Add(text);
                     }
 
                 }//Создание выпадающих списков для перечислимых типов
-                else if (fields[i].FieldType.IsEnum)
+                else if (fields[i].PropertyType.IsEnum)
                 {
-                    ComboBox combobox = new ComboBox
-                    {
-                        Name = fields[i].Name,
-                        SelectionStart = 0,
-                        DropDownStyle = ComboBoxStyle.DropDownList,
-                        Location = new Point(15 + label.Width, controlHeight * (i + 1)),
-                        Width = form.Width - (label.Location.X + label.Width + 30)
-                    };
-                    combobox.Items.AddRange(fields[i].FieldType.GetEnumNames());
-                    combobox.SelectedIndex = (int)(fields[i].GetValue(item));
+                    ComboBox combobox = CreateComboBox(fields[i].Name,
+                                                        new Point(15 + label.Width, controlHeight * (i + 1)),
+                                                        form.Width - (label.Location.X + label.Width + 30),
+                                                        fields[i].PropertyType.GetEnumNames(),
+                                                        (int)(fields[i].GetValue(item)));
                     form.Controls.Add(combobox);
 
                 }//Создание выпадающих списков для вложенных членов
-                else if ((fields[i].FieldType.IsClass))
+                else if ((fields[i].PropertyType.IsClass))
                 {
-                    ComboBox combobox = new ComboBox
-                    {
-                        Name = fields[i].Name,
-                        SelectionStart = 0,
-                        DropDownStyle = ComboBoxStyle.DropDownList,
-                        Location = new Point(15 + label.Width, controlHeight * (i + 1)),
-                        Width = form.Width - (label.Location.X + label.Width + 30)
-                    };
-
-                    //список объектов удовлетворяющих типу поля
-                    List<object> suitableItems = items.Where(s_item => ((s_item.GetType() == fields[i].FieldType) || (s_item.GetType().BaseType == fields[i].FieldType))).ToList();
-
-                    for (int j = 0; j < suitableItems.Count; j++)
-                    {
-                        combobox.Items.Add(suitableItems[j].ToString());
-                    }
-
-                    var buf = fields[i].GetValue(item);
-                    int index = -1;
-
-                    if (buf != null)
-                    {
-                        for (int j = 0; j < suitableItems.Count; j++)
-                        {
-                            if (buf.Equals(suitableItems[j]))
-                            {
-                                index = j; break;
-                            }
-                        }
-                        combobox.SelectedIndex = index;
-                    }
-
+                    ComboBox combobox = CreateComboBox(fields[i].Name,
+                                                       new Point(15 + label.Width, controlHeight * (i + 1)),
+                                                       form.Width - (label.Location.X + label.Width + 30),
+                                                       fields[i].PropertyType,
+                                                       fields[i].GetValue(item),
+                                                       items);
                     form.Controls.Add(combobox);
                 }
             }
@@ -239,7 +271,6 @@ namespace OOP_CRUD
             //кнопка сохранения
             Button btn = new Button
             {
-                Name = "btnSave",
                 Text = "Save",
                 Location = new Point(form.Width / 2 - (form.Width / 8), (fields.Length + 1) * controlHeight),
                 Width = form.Width / 4,
@@ -290,12 +321,12 @@ namespace OOP_CRUD
             //у которых среди полей
             //есть поле с типом удаляемого объекта или его родительским типом
             var ownerList = items.Where(itm => (itm.GetType()
-            .GetFields()
-            .Where(fld => ((fld.FieldType == item.GetType() || fld.FieldType.BaseType == item.GetType())))).ToList().Count > 0).ToList();
+            .GetProperties()
+            .Where(fld => ((fld.PropertyType == item.GetType() || fld.PropertyType.BaseType == item.GetType())))).ToList().Count > 0).ToList();
 
             foreach (var owner in ownerList)
             {
-                foreach (var fld in owner.GetType().GetFields().Where(fld => (fld.FieldType == item.GetType())).ToList())
+                foreach (var fld in owner.GetType().GetProperties().Where(fld => (fld.PropertyType == item.GetType())).ToList())
                 {
                     if ((fld.GetValue(owner) != null) && (fld.GetValue(owner).Equals(item)))
                     {
