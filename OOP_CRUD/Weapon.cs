@@ -10,24 +10,24 @@ namespace OOP_CRUD
     [DisplayName("Оружие")]
     public class Weapon
     {
-        public string modelName;
-        public float weight;
-        public string material;
-        public int durability;
-        public int damage;
+        public string ModelName { get; set;}
+        public float Weight { get; set; }
+        public string Material { get; set; }
+        public int Durability { get; set; }
+        public int Damage { get; set; }
 
         public Weapon()
         {
-            modelName = "undefined";
-            weight = 0;
-            material = "test";
-            durability = 0;
-            damage = 0;
+            ModelName = "undefined";
+            Weight = 0;
+            Material = "test";
+            Durability = 0;
+            Damage = 0;
         }
 
         public override string ToString()
         {
-            return modelName;
+            return ModelName;
             //return base.ToString();
         }
     }
@@ -35,68 +35,73 @@ namespace OOP_CRUD
     [DisplayName("Боеприпасы")]
     public class Ammunition
     {
-        public string name;
-        public float weight;
+        public float Weight { get; set; }
 
         public Ammunition()
         {
-            name = "undefined";
-            weight = 0;
+            Weight = 0;
         }
 
         public override string ToString()
         {
-            return name;
+            return Weight.ToString();
         }
     }
 
     [DisplayName("Стрела")]
     public class Arrow : Ammunition
     {
-        public int shaftLenght;
-        public int numberOfFeathers;
+        public string Name { get; set; }
+        public int ShaftLenght { get; set; }
+        public int NumberOfFeathers { get; set; }
 
         public Arrow()
         {
-            shaftLenght = 0;
-            numberOfFeathers = 0;
+            Name = "undefined";
+            ShaftLenght = 0;
+            NumberOfFeathers = 0;
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 
     [DisplayName("Пуля")]
     public class Bullet : Ammunition
     {
-        public float caliber;
-        public int penetratingAbility;
+        public float Caliber { get; set; }
+        public int PenetratingAbility { get; set; }
 
         public Bullet()
         {
-            caliber = 0;
-            penetratingAbility = 0;
+            Caliber = 0;
+            PenetratingAbility = 0;
         }
 
         public override string ToString()
         {
-            return caliber.ToString();
+            return Caliber.ToString();
         }
     }
 
     [DisplayName("Оружие дальнего боя")]
     public class RangedWeapon : Weapon
     {
-        public int distance;
+        public int Distance { get; set; }
         [Description("Aggregation")]
-        public Ammunition ammunition = null;
-        public int rechargeTime;
-        public int shotsPerMinute;
-        public int accuracy;
+        public Ammunition Ammunition { get; set; }
+        public int RechargeTime { get; set; }
+        public int ShotsPerMinute { get; set; }
+        public int Accuracy { get; set; }
 
         public RangedWeapon()
         {
-            distance = 0;
-            rechargeTime = 0;
-            shotsPerMinute = 0;
-            accuracy = 0;
+            Distance = 0;
+            RechargeTime = 0;
+            ShotsPerMinute = 0;
+            Accuracy = 0;
         }
     }
 
@@ -105,47 +110,47 @@ namespace OOP_CRUD
     [DisplayName("Оружие ближнего боя")]
     public class MelleeWeapon : Weapon
     {
-        public int handleLenght;
-        public int range;
-        public DamageType damageType;
+        public int HandleLenght { get; set; }
+        public int Range { get; set; }
+        public DamageType DamageType { get; set; }
 
         public MelleeWeapon()
         {
-            handleLenght = 0;
-            range = 0;
-            damageType = DamageType.None;
+            HandleLenght = 0;
+            Range = 0;
+            DamageType = DamageType.None;
         }
     }
 
     [DisplayName("Клинок")]
     public class BladedWeapon : MelleeWeapon
     {
-        public int numberOfBlades;
-        public int sharpness;
-        public int bladeLenght;
+        public int NumberOfBlades { get; set; }
+        public int Sharpness { get; set; }
+        public int BladeLenght { get; set; }
 
         public BladedWeapon()
         {
-            numberOfBlades = 0;
-            sharpness = 0;
-            bladeLenght = 0;
+            NumberOfBlades = 0;
+            Sharpness = 0;
+            BladeLenght = 0;
         }
     }
 
     [DisplayName("Огенстрельное оружие")]
     public class Firearm : RangedWeapon
     {
-        public int catrigeCapacity;
-        public bool isAutomatic;
-        public float caliber;
-        public int numberOfBarrels;
+        public int CatrigeCapacity { get; set; }
+        public bool IsAutomatic { get; set; }
+        public float Caliber { get; set; }
+        public int NumberOfBarrels { get; set; }
 
         public Firearm()
         {
-            catrigeCapacity = 0;
-            isAutomatic = false;
-            caliber = 0;
-            numberOfBarrels = 0;
+            CatrigeCapacity = 0;
+            IsAutomatic = false;
+            Caliber = 0;
+            NumberOfBarrels = 0;
         }
 
     }
@@ -155,18 +160,18 @@ namespace OOP_CRUD
     [DisplayName("Прицел")]
     public class Gunsight
     {
-        public AimType aimType;
-        public int zoom;
+        public AimType AimType { get; set; }
+        public int Zoom { get; set; }
 
         public Gunsight()
         {
-            aimType = AimType.None;
-            zoom = 0;
+            AimType = AimType.None;
+            Zoom = 0;
         }
 
         public override string ToString()
         {
-            return aimType.ToString() + " Gunsight";
+            return AimType.ToString() + " Gunsight";
         }
     }
 
@@ -174,14 +179,16 @@ namespace OOP_CRUD
     public class AutomaticRifle : Firearm
     {
 
-        public BladedWeapon bayonet = null;
-        public bool butt;
+        public BladedWeapon Bayonet { get; set; }
+        public bool Butt { get; set; }
         [Description("Aggregation")]
-        public Gunsight gunsight = null;
+        public Gunsight Gunsight{ get; set; }
 
         public AutomaticRifle()
         {
-            butt = false;
+            Gunsight = null;
+            Bayonet = null;
+            Butt = false;
         }
     }
 
@@ -190,39 +197,40 @@ namespace OOP_CRUD
     [DisplayName("Метательное оружие")]
     public class ThrowingWeapon : RangedWeapon
     {
-        public MechanismType mechanismType;
+        public MechanismType MechanismType { get; set; }
 
         public ThrowingWeapon()
         {
-            mechanismType = 0;
+            MechanismType = 0;
         }
     }
 
     [DisplayName("Лук")]
     public class Bow : ThrowingWeapon
     {
-        public string bowstringType;
-        public int arcLenght;
+        public string BowstringType { get; set; }
+        public int ArcLenght { get; set; }
 
         public Bow()
         {
-            bowstringType = " ";
-            arcLenght = 0;
+            BowstringType = " ";
+            ArcLenght = 0;
         }
     }
 
     [DisplayName("Арбалет")]
     public class Crossbow : ThrowingWeapon
     {
-        public string bowstringType;
+        public string BowstringType { get; set; }
         [Description("Aggregation")]
-        public Gunsight gunsight = null;
-        public string triggerType;
+        public Gunsight Gunsight { get; set; }
+        public string TriggerType { get; set; }
 
         public Crossbow()
         {
-            bowstringType = " ";
-            triggerType = " ";
+            Gunsight = null;
+            BowstringType = " ";
+            TriggerType = " ";
         }
     }
 
