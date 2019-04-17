@@ -13,6 +13,11 @@ namespace OOP_CRUD
 {
     public partial class CRUDForm : Form
     {
+        private List<ISerializer> serializers = new List<ISerializer>()
+        {
+            new BinarySerializer(),
+            new JSONSerializer()
+        };
         public ICRUDHelper CRUDAssistant = null;
         public Form editForm = null;
         public List<object> itemList = new List<object>();
@@ -23,7 +28,7 @@ namespace OOP_CRUD
         {
             InitializeComponent();
             CRUDAssistant = CRUDHelper;
-            CRUDAssistant.ItemsInit(itemList);
+            //CRUDAssistant.ItemsInit(itemList);
             activeItemList = itemList;
             itemCreator = availibleTypes;
         }
@@ -45,6 +50,22 @@ namespace OOP_CRUD
             itemsListView.View = View.Details;
 
             CRUDAssistant.ListRedraw(itemsListView, activeItemList);
+
+
+            foreach (var item in serializers)
+            {
+                string typeString = item.GetType().Name;
+
+                if (item.GetType().GetCustomAttributes(typeof(DisplayNameAttribute), false).FirstOrDefault() is DisplayNameAttribute displayNameAttribute)
+                    typeString = displayNameAttribute.DisplayName;
+
+                comboBoxChooseSerializer.Items.Add(typeString);
+            }
+
+            if(comboBoxChooseSerializer.Items.Count != 0)
+                comboBoxChooseSerializer.SelectedIndex = 0;
+
+            comboBoxChooseSerializer.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
 
@@ -121,6 +142,30 @@ namespace OOP_CRUD
             return (specificClass && (classType != null)) 
                 ?  items.Where(item => (item.GetType() == classType)).ToList() 
                 :  items;
+        }
+
+        private void buttonSave_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.InitialDirectory = @"G:\Учеба\4 сем\ООП\Лабы\lab1\OOP_CRUD lab 2\OOP_CRUD\bin\Debug" ;
+            openFileDialog.ShowDialog();
+            MessageBox.Show(openFileDialog.FileName);
+            
+            if (comboBoxChooseSerializer.Items.Count == 0)
+                return;
+            serializers[comboBoxChooseSerializer.SelectedIndex].Serialize(itemList);
+            activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
+            CRUDAssistant.ListRedraw(itemsListView, activeItemList);
+        }
+
+        private void buttonLoad_Click(object sender, EventArgs e)
+        {
+            if (comboBoxChooseSerializer.Items.Count == 0)
+                return;
+
+            itemList = (List<Object>)serializers[comboBoxChooseSerializer.SelectedIndex].Deserialize(itemList);
+            activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
+            CRUDAssistant.ListRedraw(itemsListView, activeItemList);
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace OOP_CRUD
 {
     [DisplayName("Оружие")]
+    [Serializable]
     public class Weapon
     {
         public string ModelName { get; set;}
@@ -33,6 +34,7 @@ namespace OOP_CRUD
     }
 
     [DisplayName("Боеприпасы")]
+    [Serializable]
     public class Ammunition
     {
         public float Weight { get; set; }
@@ -49,6 +51,7 @@ namespace OOP_CRUD
     }
 
     [DisplayName("Стрела")]
+    [Serializable]
     public class Arrow : Ammunition
     {
         public string Name { get; set; }
@@ -69,6 +72,7 @@ namespace OOP_CRUD
     }
 
     [DisplayName("Пуля")]
+    [Serializable]
     public class Bullet : Ammunition
     {
         public float Caliber { get; set; }
@@ -87,6 +91,7 @@ namespace OOP_CRUD
     }
 
     [DisplayName("Оружие дальнего боя")]
+    [Serializable]
     public class RangedWeapon : Weapon
     {
         public int Distance { get; set; }
@@ -108,6 +113,7 @@ namespace OOP_CRUD
     public enum DamageType {None =  0, Slashing = 1, Cutting, Piercing, Crushing};
 
     [DisplayName("Оружие ближнего боя")]
+    [Serializable]
     public class MelleeWeapon : Weapon
     {
         public int HandleLenght { get; set; }
@@ -123,6 +129,7 @@ namespace OOP_CRUD
     }
 
     [DisplayName("Клинок")]
+    [Serializable]
     public class BladedWeapon : MelleeWeapon
     {
         public int NumberOfBlades { get; set; }
@@ -138,6 +145,7 @@ namespace OOP_CRUD
     }
 
     [DisplayName("Огенстрельное оружие")]
+    [Serializable]
     public class Firearm : RangedWeapon
     {
         public int CatrigeCapacity { get; set; }
@@ -158,6 +166,7 @@ namespace OOP_CRUD
     public enum AimType { None = 0, Laser, Collimator, Optic, Holographic };
 
     [DisplayName("Прицел")]
+    [Serializable]
     public class Gunsight
     {
         public AimType AimType { get; set; }
@@ -176,6 +185,7 @@ namespace OOP_CRUD
     }
 
     [DisplayName("Автоматическая винтовка")]
+    [Serializable]
     public class AutomaticRifle : Firearm
     {
 
@@ -195,6 +205,7 @@ namespace OOP_CRUD
     public enum MechanismType{None = 0,NotСollapsible = 1, Collapsible, Folding};
 
     [DisplayName("Метательное оружие")]
+    [Serializable]
     public class ThrowingWeapon : RangedWeapon
     {
         public MechanismType MechanismType { get; set; }
@@ -206,6 +217,7 @@ namespace OOP_CRUD
     }
 
     [DisplayName("Лук")]
+    [Serializable]
     public class Bow : ThrowingWeapon
     {
         public string BowstringType { get; set; }
@@ -219,6 +231,7 @@ namespace OOP_CRUD
     }
 
     [DisplayName("Арбалет")]
+    [Serializable]
     public class Crossbow : ThrowingWeapon
     {
         public string BowstringType { get; set; }

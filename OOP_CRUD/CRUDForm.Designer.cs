@@ -34,6 +34,9 @@
             this.comboBoxTypes = new System.Windows.Forms.ComboBox();
             this.itemsListView = new System.Windows.Forms.ListView();
             this.checkBoxFilter = new System.Windows.Forms.CheckBox();
+            this.buttonSave = new System.Windows.Forms.Button();
+            this.buttonLoad = new System.Windows.Forms.Button();
+            this.comboBoxChooseSerializer = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // buttonCreate
@@ -100,11 +103,42 @@
             this.checkBoxFilter.UseVisualStyleBackColor = true;
             this.checkBoxFilter.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
+            // buttonSave
+            // 
+            this.buttonSave.Location = new System.Drawing.Point(13, 215);
+            this.buttonSave.Name = "buttonSave";
+            this.buttonSave.Size = new System.Drawing.Size(75, 23);
+            this.buttonSave.TabIndex = 8;
+            this.buttonSave.Text = "Save";
+            this.buttonSave.UseVisualStyleBackColor = true;
+            this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
+            // 
+            // buttonLoad
+            // 
+            this.buttonLoad.Location = new System.Drawing.Point(94, 215);
+            this.buttonLoad.Name = "buttonLoad";
+            this.buttonLoad.Size = new System.Drawing.Size(75, 23);
+            this.buttonLoad.TabIndex = 9;
+            this.buttonLoad.Text = "Load";
+            this.buttonLoad.UseVisualStyleBackColor = true;
+            this.buttonLoad.Click += new System.EventHandler(this.buttonLoad_Click);
+            // 
+            // comboBoxChooseSerializer
+            // 
+            this.comboBoxChooseSerializer.FormattingEnabled = true;
+            this.comboBoxChooseSerializer.Location = new System.Drawing.Point(13, 244);
+            this.comboBoxChooseSerializer.Name = "comboBoxChooseSerializer";
+            this.comboBoxChooseSerializer.Size = new System.Drawing.Size(156, 21);
+            this.comboBoxChooseSerializer.TabIndex = 10;
+            // 
             // CRUDForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(481, 223);
+            this.ClientSize = new System.Drawing.Size(481, 269);
+            this.Controls.Add(this.comboBoxChooseSerializer);
+            this.Controls.Add(this.buttonLoad);
+            this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.checkBoxFilter);
             this.Controls.Add(this.itemsListView);
             this.Controls.Add(this.comboBoxTypes);
@@ -127,6 +161,9 @@
         private System.Windows.Forms.ComboBox comboBoxTypes;
         private System.Windows.Forms.ListView itemsListView;
         private System.Windows.Forms.CheckBox checkBoxFilter;
+        private System.Windows.Forms.Button buttonSave;
+        private System.Windows.Forms.Button buttonLoad;
+        private System.Windows.Forms.ComboBox comboBoxChooseSerializer;
     }
 }
 
