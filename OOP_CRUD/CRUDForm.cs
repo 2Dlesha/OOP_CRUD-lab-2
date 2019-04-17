@@ -47,6 +47,17 @@ namespace OOP_CRUD
             CRUDAssistant.ListRedraw(itemsListView, activeItemList);
         }
 
+
+        private void CreateItemEditForm(Object item, List<Object> itemList)
+        {
+            if (item != null)
+            {
+                editForm = CRUDAssistant.CreateForm(item, itemList);
+                editForm.ShowDialog();
+                editForm.Dispose();
+            }
+        }
+
         private void buttonCreate_Click(object sender, EventArgs e)
         {
             ConstructorInfo itemConstructor = itemCreator[comboBoxTypes.SelectedIndex].GetConstructor(new Type[] { });
@@ -54,15 +65,10 @@ namespace OOP_CRUD
             itemList.Add(newitem);
 
             activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
-            CRUDAssistant.ListRedraw(itemsListView, activeItemList);
 
-            ListViewItem listViewItem = itemsListView.Items[(activeItemList.Count - 1)];
-            if (listViewItem != null)
-            {
-                itemsListView.Focus();
-                listViewItem.Selected = true;
-                buttonEdit.PerformClick();
-            }
+            CreateItemEditForm(newitem, itemList);
+
+            CRUDAssistant.ListRedraw(itemsListView, activeItemList);
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)
@@ -81,9 +87,7 @@ namespace OOP_CRUD
             object item = GetFocusItem();
             if (item != null)
             {
-                editForm = CRUDAssistant.CreateForm(item, itemList);
-                editForm.ShowDialog();
-                editForm.Dispose();
+                CreateItemEditForm(item, itemList);
                 CRUDAssistant.ListRedraw(itemsListView, activeItemList);
             }
         }
