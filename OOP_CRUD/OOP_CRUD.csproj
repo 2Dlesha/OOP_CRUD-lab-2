@@ -56,8 +56,11 @@
     <Compile Include="CRUDForm.Designer.cs">
       <DependentUpon>CRUDForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ISerializer.cs" />
+    <Compile Include="JSONSerializer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextSerializer.cs" />
     <Compile Include="Weapon.cs" />
     <EmbeddedResource Include="CRUDForm.resx">
       <DependentUpon>CRUDForm.cs</DependentUpon>

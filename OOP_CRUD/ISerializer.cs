@@ -6,11 +6,7 @@ namespace OOP_CRUD
     {
         void Serialize(Object item);
         Object Deserialize(Object item);
+        string FilePath { get; set; }
 
     }
-
-
-
-
-
 }
