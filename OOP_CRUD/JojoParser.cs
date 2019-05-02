@@ -8,6 +8,10 @@ namespace OOP_CRUD
 {
     class JojoParser
     {
+
+
+        private List<Container> _referenceList = new List<Container>();
+
         private string ParseList(string str)
         {
             return null;
@@ -48,24 +52,52 @@ namespace OOP_CRUD
 
         public string CutTillMatchinPare(char openSymbol,ref string svList, char closeSymbol)
         {
+            Stack<char> brStack = new Stack<char>();
+
             if (svList == null || svList.Length <= 1)
                 return "";
 
             if (svList[0] == openSymbol)
             {
-                int i = 1;
-                while ((svList[i] != closeSymbol)&&(i < svList.Length))
+                int i = 0;
+                while ( (i == 0) && (svList[i] != closeSymbol) && (i < svList.Length) && (brStack.Count == 0))
+                {
+                    if (svList[i] == openSymbol)
+                        brStack.Push(openSymbol);
+                    if (svList[i] == closeSymbol)
+                        brStack.Pop();
+
                     i++;
+                }
 
                 if (i < svList.Length)
                 {
-                    string result = svList.Substring(1, i);
+                    string result = svList.Substring(1, i - 1);
                     svList = svList.Substring(i + 1);
                     return result ;
                 }
             }
 
             return "";
+        }
+
+        public Object ParseJojoObject(string obj)
+        {
+            string objectForParse = obj;
+            string currentObjectString = CutTillMatchinPare('{',ref objectForParse, '}');
+
+            Container container = new Container();
+            string token;
+            while (CutNextToken(ref currentObjectString, "," , out token))
+            {
+                string key;
+                string value;
+                CutNextToken(ref currentObjectString, ":", out key);
+                value = currentObjectString;
+            }
+
+
+            return null;
         }
     }
 }

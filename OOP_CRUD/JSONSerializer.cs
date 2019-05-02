@@ -36,6 +36,7 @@ namespace OOP_CRUD
         public Object Deserialize(Object itemList)
         {
             string jsonObject = String.Empty;
+
             using (StreamReader fs = new StreamReader(FilePath))
             {
                 jsonObject = fs.ReadToEnd();

@@ -9,18 +9,6 @@ namespace OOP_CRUD
 {
     class JojoFormatter
     {
-        class Container
-        {
-            public Container(object obj, int id)
-            {
-                this.container = obj;
-                this.id = id;
-            }
-
-            public int id = 0;
-            public object container = null;
-        }
-
         private List<Container> _referenceList = new List<Container>();
         private int _idCounter = 1;
 
@@ -81,7 +69,7 @@ namespace OOP_CRUD
         {
             StringBuilder textSerializerBuilder = new StringBuilder();
 
-            textSerializerBuilder.AppendLine(tabs + _objectOpenSymbol);
+            textSerializerBuilder.AppendLine(/*tabs +*/  "" + _objectOpenSymbol);
             textSerializerBuilder.AppendLine(tabs + tab + _referenceAttribute + ':' + tab + FindID(obj));
             textSerializerBuilder.Append(tabs + _objectCloseSymbol);
 
@@ -98,12 +86,12 @@ namespace OOP_CRUD
             }
             else
             {
-                _referenceList.Add(new Container(obj, _idCounter++));
+                _referenceList.Add(new Container(obj, _idCounter));
             }
 
             textSerializerBuilder.AppendLine(/*tabs +*/ "" + _objectOpenSymbol);
             textSerializerBuilder.AppendLine(tabs + tab + '"' + _typeAttribute + '"' + ":" + tab + '"' + obj.GetType().ToString() + '"' + _objectDelimeter);
-            textSerializerBuilder.AppendLine(tabs + tab + '"' + _idAttribute + '"' + ":" + tab + _idCounter.ToString() + _objectDelimeter);
+            textSerializerBuilder.AppendLine(tabs + tab + '"' + _idAttribute + '"' + ":" + tab + (_idCounter++).ToString() + _objectDelimeter);
 
             if (obj.GetType().GetInterface("ICollection") != null || (obj.GetType().GetInterface("IEnumerable`1") != null))
             {
@@ -165,5 +153,22 @@ namespace OOP_CRUD
             _idCounter = 1;
             return FormatObject(item);
         }
+    }
+
+    public class Container
+    {
+        public Container(object obj, int id)
+        {
+            this.container = obj;
+            this.id = id;
+        }
+
+        public Container()
+        {
+
+        }
+
+        public int id = 0;
+        public object container = null;
     }
 }

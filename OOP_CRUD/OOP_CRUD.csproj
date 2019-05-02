@@ -57,7 +57,7 @@
       <DependentUpon>CRUDForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ISerializer.cs" />
-    <Compile Include="JojoParser1.cs" />
+    <Compile Include="JojoParser.cs" />
     <Compile Include="JSONSerializer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
