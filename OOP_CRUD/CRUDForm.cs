@@ -17,8 +17,9 @@ namespace OOP_CRUD
         {
             new BinarySerializer(),
             new JSONSerializer(),
-            new TextSerializer()
+            new JojoSerializer()
         };
+
         public ICRUDHelper CRUDAssistant = null;
         public Form editForm = null;
         public List<object> itemList = new List<object>();
