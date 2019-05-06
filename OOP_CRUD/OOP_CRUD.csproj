@@ -62,7 +62,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="JojoFormatter.cs" />
-    <Compile Include="TextSerializer.cs" />
+    <Compile Include="JojoSerializer.cs" />
     <Compile Include="Weapon.cs" />
     <EmbeddedResource Include="CRUDForm.resx">
       <DependentUpon>CRUDForm.cs</DependentUpon>

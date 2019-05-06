@@ -90,7 +90,7 @@ namespace OOP_CRUD
             }
 
             textSerializerBuilder.AppendLine(/*tabs +*/ "" + _objectOpenSymbol);
-            textSerializerBuilder.AppendLine(tabs + tab + '"' + _typeAttribute + '"' + ":" + tab + '"' + obj.GetType().ToString() + '"' + _objectDelimeter);
+            textSerializerBuilder.AppendLine(tabs + tab + '"' + _typeAttribute + '"' + ":" + tab + '"' + obj.GetType().FullName + '"' + _objectDelimeter);
             textSerializerBuilder.AppendLine(tabs + tab + '"' + _idAttribute + '"' + ":" + tab + (_idCounter++).ToString() + _objectDelimeter);
 
             if (obj.GetType().GetInterface("ICollection") != null || (obj.GetType().GetInterface("IEnumerable`1") != null))
@@ -146,7 +146,6 @@ namespace OOP_CRUD
 
             return textSerializerBuilder.ToString();
         }
-
 
         public string GetObjectInfo(Object item)
         {

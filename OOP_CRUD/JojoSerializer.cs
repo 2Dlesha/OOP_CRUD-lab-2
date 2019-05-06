@@ -37,7 +37,8 @@ namespace OOP_CRUD
             {
                 objectInfo = streamReader.ReadToEnd();
             }
-            object deserializedObject = new List<Object>();
+            JojoParser jojoParser = new JojoParser();
+            object deserializedObject = jojoParser.ParseJojoObject(objectInfo);
             return (List<Object>)deserializedObject;
         }
     }
