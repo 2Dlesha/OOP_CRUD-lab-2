@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace OOP_CRUD
 {
-    class JojoSerializer : ISerializer
+    public class JojoSerializer : ISerializer
     {
 
         public string FilePath { get; set; }
@@ -22,7 +22,6 @@ namespace OOP_CRUD
             string objectInfo = String.Empty;
             JojoFormatter textFormatter = new JojoFormatter();
             objectInfo = textFormatter.GetObjectInfo(itemList);
-            //MessageBox.Show(objectInfo);
             using (StreamWriter streamWriter = new StreamWriter(FilePath))
             {
                 streamWriter.Write(objectInfo);
@@ -39,7 +38,7 @@ namespace OOP_CRUD
             }
             JojoParser jojoParser = new JojoParser();
             object deserializedObject = jojoParser.ParseJojoObject(objectInfo);
-            return (List<Object>)deserializedObject;
+            return deserializedObject;
         }
     }
 

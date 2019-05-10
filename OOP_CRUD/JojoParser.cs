@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace OOP_CRUD
 {
-    class JojoParser
+    public class JojoParser
     {
         private List<Container> _referenceList = new List<Container>();
 
@@ -116,7 +116,18 @@ namespace OOP_CRUD
             PropertyInfo propertyInfo = obj.GetType().GetProperty(propertyName);
             try
             {
-                propertyInfo.SetValue(obj, Convert.ChangeType(propertyValue, propertyInfo.PropertyType));
+                if ((propertyInfo.PropertyType.IsPrimitive) || (propertyInfo.PropertyType.IsEnum) || (propertyInfo.PropertyType == typeof(string)) || (propertyInfo.PropertyType.IsValueType))
+                {
+                    if (propertyInfo.PropertyType.IsEnum)
+                        propertyInfo.SetValue(obj, Convert.ToInt32(propertyValue));
+                    else
+                        propertyInfo.SetValue(obj, Convert.ChangeType(propertyValue, propertyInfo.PropertyType));
+                }
+                else
+                {
+                    propertyInfo.SetValue(obj, propertyValue);
+                }
+
             }
             catch
             {
@@ -136,7 +147,6 @@ namespace OOP_CRUD
                 }
             }
             list = collection;
-
         }
 
         private Container FindReferenceByID(int id)

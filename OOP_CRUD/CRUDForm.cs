@@ -53,7 +53,6 @@ namespace OOP_CRUD
 
             CRUDAssistant.ListRedraw(itemsListView, activeItemList);
 
-
             foreach (var item in serializers)
             {
                 string typeString = item.GetType().Name;
@@ -148,13 +147,14 @@ namespace OOP_CRUD
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            //OpenFileDialog openFileDialog = new OpenFileDialog();
-            //openFileDialog.InitialDirectory = @"G:\Учеба\4 сем\ООП\Лабы\lab1\OOP_CRUD lab 2\OOP_CRUD\bin\Debug" ;
-            //openFileDialog.ShowDialog();
-            //MessageBox.Show(openFileDialog.FileName);
-            
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.InitialDirectory = @"G:\Учеба\4 сем\ООП\Лабы\lab1\OOP_CRUD lab 2\OOP_CRUD\bin\Debug";
+            openFileDialog.ShowDialog();
+            MessageBox.Show(openFileDialog.FileName);
+
             if (comboBoxChooseSerializer.Items.Count == 0)
                 return;
+
             serializers[comboBoxChooseSerializer.SelectedIndex].Serialize(itemList);
             activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
             CRUDAssistant.ListRedraw(itemsListView, activeItemList);

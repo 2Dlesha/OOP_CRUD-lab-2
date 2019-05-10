@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace OOP_CRUD
 {
-    class JSONSerializer : ISerializer
+    public class JSONSerializer : ISerializer
     {
         public string FilePath { get; set; }
 
@@ -17,20 +17,16 @@ namespace OOP_CRUD
 
         public void Serialize(Object itemList)
         {
-
             string jsonObject = JsonConvert.SerializeObject(itemList, Formatting.Indented, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
                 PreserveReferencesHandling = PreserveReferencesHandling.Objects
             });
 
-            MessageBox.Show(jsonObject);
-
             using (StreamWriter fs = new StreamWriter(FilePath))
             {
                 fs.Write(jsonObject);
             }
-
         }
 
         public Object Deserialize(Object itemList)
@@ -48,7 +44,7 @@ namespace OOP_CRUD
                 TypeNameHandling = TypeNameHandling.All
             });
 
-            return (List<Object>)deserializedObject; 
+            return deserializedObject; 
         }
     }
 }

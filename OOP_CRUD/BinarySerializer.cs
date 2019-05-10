@@ -11,7 +11,7 @@ using System.Xml.Serialization;
 namespace OOP_CRUD
 {
 
-    class BinarySerializer : ISerializer
+    public class BinarySerializer : ISerializer
     {
         public string FilePath { get; set; }
 
@@ -20,11 +20,9 @@ namespace OOP_CRUD
             FilePath = "CRUD.dat";
         }
 
-
         public void Serialize(Object itemList)
         {
             BinaryFormatter formatter = new BinaryFormatter();
-
             using (FileStream fs = new FileStream(FilePath, FileMode.OpenOrCreate))
             {
                 formatter.Serialize(fs, itemList);
@@ -34,11 +32,10 @@ namespace OOP_CRUD
         public Object Deserialize(Object itemList)
         {
             BinaryFormatter formatter = new BinaryFormatter();
-            // десериализация из файла people.dat
-            List<Object> buf = new List<object>();
+            Object buf = null;
             using (FileStream fs = new FileStream(FilePath, FileMode.OpenOrCreate))
             {
-                buf = (List<Object>)formatter.Deserialize(fs);
+                buf = formatter.Deserialize(fs);
             }
 
             return buf;
