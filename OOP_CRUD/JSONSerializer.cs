@@ -8,14 +8,13 @@ namespace OOP_CRUD
 {
     public class JSONSerializer : ISerializer
     {
-        public string FilePath { get; set; }
+        public string FileExtension { get; }  = ".json";
 
         public JSONSerializer()
         {
-            FilePath = "CRUD.json";
         }
 
-        public void Serialize(Object itemList)
+        public void Serialize(Object itemList, string fileName)
         {
             string jsonObject = JsonConvert.SerializeObject(itemList, Formatting.Indented, new JsonSerializerSettings
             {
@@ -23,17 +22,17 @@ namespace OOP_CRUD
                 PreserveReferencesHandling = PreserveReferencesHandling.Objects
             });
 
-            using (StreamWriter fs = new StreamWriter(FilePath))
+            using (StreamWriter fs = new StreamWriter(fileName))
             {
                 fs.Write(jsonObject);
             }
         }
 
-        public Object Deserialize(Object itemList)
+        public Object Deserialize(string fileName)
         {
             string jsonObject = String.Empty;
 
-            using (StreamReader fs = new StreamReader(FilePath))
+            using (StreamReader fs = new StreamReader(fileName))
             {
                 jsonObject = fs.ReadToEnd();
             }

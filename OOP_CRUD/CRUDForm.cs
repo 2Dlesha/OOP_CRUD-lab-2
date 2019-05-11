@@ -8,36 +8,37 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Reflection;
+using System.IO;
 
 namespace OOP_CRUD
 {
     public partial class CRUDForm : Form
     {
-        private List<ISerializer> serializers = new List<ISerializer>()
+        private List<ISerializer> _serializers = new List<ISerializer>()
         {
             new BinarySerializer(),
             new JSONSerializer(),
             new JojoSerializer()
         };
 
-        public ICRUDHelper CRUDAssistant = null;
-        public Form editForm = null;
-        public List<object> itemList = new List<object>();
-        public List<object> activeItemList = new List<object>();
-        public List<Type> itemCreator = new List<Type>();
+        public ICRUDHelper _CRUDAssistant = null;
+        public Form _editForm = null;
+        public List<object> _itemList = new List<object>();
+        public List<object> _activeItemList = new List<object>();
+        public List<Type> _itemCreator = new List<Type>();
 
         public CRUDForm(List<Type> availibleTypes, ICRUDHelper CRUDHelper)
         {
             InitializeComponent();
-            CRUDAssistant = CRUDHelper;
+            _CRUDAssistant = CRUDHelper;
             //CRUDAssistant.ItemsInit(itemList);
-            activeItemList = itemList;
-            itemCreator = availibleTypes;
+            _activeItemList = _itemList;
+            _itemCreator = availibleTypes;
         }
 
         private void CRUDForm_Load(object sender, EventArgs e)
         {
-            foreach (var item in itemCreator)
+            foreach (var item in _itemCreator)
             {
                 string typeString = item.Name; 
 
@@ -51,9 +52,9 @@ namespace OOP_CRUD
             comboBoxTypes.DropDownStyle = ComboBoxStyle.DropDownList;
             itemsListView.View = View.Details;
 
-            CRUDAssistant.ListRedraw(itemsListView, activeItemList);
+            _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
 
-            foreach (var item in serializers)
+            foreach (var item in _serializers)
             {
                 string typeString = item.GetType().Name;
 
@@ -74,23 +75,23 @@ namespace OOP_CRUD
         {
             if (item != null)
             {
-                editForm = CRUDAssistant.CreateForm(item, itemList);
-                editForm.ShowDialog();
-                editForm.Dispose();
+                _editForm = _CRUDAssistant.CreateForm(item, itemList);
+                _editForm.ShowDialog();
+                _editForm.Dispose();
             }
         }
 
         private void buttonCreate_Click(object sender, EventArgs e)
         {
-            ConstructorInfo itemConstructor = itemCreator[comboBoxTypes.SelectedIndex].GetConstructor(new Type[] { });
+            ConstructorInfo itemConstructor = _itemCreator[comboBoxTypes.SelectedIndex].GetConstructor(new Type[] { });
             object newitem = itemConstructor.Invoke(new object[] { });
-            itemList.Add(newitem);
+            _itemList.Add(newitem);
 
-            activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
+            _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
 
-            CreateItemEditForm(newitem, itemList);
+            CreateItemEditForm(newitem, _itemList);
 
-            CRUDAssistant.ListRedraw(itemsListView, activeItemList);
+            _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)
@@ -98,9 +99,9 @@ namespace OOP_CRUD
             object item = GetFocusItem();
             if (item != null)
             {
-                CRUDAssistant.DeleteItem(item, itemList);
-                activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
-                CRUDAssistant.ListRedraw(itemsListView, activeItemList);
+                _CRUDAssistant.DeleteItem(item, _itemList);
+                _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
+                _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
             }
         }
 
@@ -109,18 +110,18 @@ namespace OOP_CRUD
             object item = GetFocusItem();
             if (item != null)
             {
-                CreateItemEditForm(item, itemList);
-                CRUDAssistant.ListRedraw(itemsListView, activeItemList);
+                CreateItemEditForm(item, _itemList);
+                _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
             }
         }
 
         public object GetFocusItem()
         {
             object item = null;
-            activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
+            _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
 
             if (itemsListView.SelectedIndices.Count != 0)
-                item = activeItemList[itemsListView.SelectedIndices[0]];
+                item = _activeItemList[itemsListView.SelectedIndices[0]];
 
             return item;
         }
@@ -128,14 +129,14 @@ namespace OOP_CRUD
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
-            CRUDAssistant.ListRedraw(itemsListView, activeItemList);
+            _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
+            _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
-            CRUDAssistant.ListRedraw(itemsListView, activeItemList);
+            _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
+            _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
         }
 
         public  List<object> GetActiveList(List<object> items, bool specificClass, Type classType)
@@ -145,29 +146,71 @@ namespace OOP_CRUD
                 :  items;
         }
 
-        private void buttonSave_Click(object sender, EventArgs e)
+        private string ChooseFile()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = @"G:\Учеба\4 сем\ООП\Лабы\lab1\OOP_CRUD lab 2\OOP_CRUD\bin\Debug";
             openFileDialog.ShowDialog();
-            MessageBox.Show(openFileDialog.FileName);
+            return openFileDialog.FileName;
+        }
 
-            if (comboBoxChooseSerializer.Items.Count == 0)
+        private ISerializer ChooseSerializer(string ext)
+        {
+            foreach (var serializer in _serializers)
+            {
+                if (ext == serializer.FileExtension)
+                    return serializer;
+            }
+            return null;
+        }
+
+
+        private void buttonSave_Click(object sender, EventArgs e)
+        {
+            string destinationFileName = ChooseFile();
+            ISerializer serializer = _serializers[comboBoxChooseSerializer.SelectedIndex]; 
+            if (destinationFileName.Length != 0)
+            {
+                if (serializer.FileExtension != Path.GetExtension(destinationFileName))
+                { 
+                    destinationFileName += serializer.FileExtension;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Choose File!");
                 return;
+            }
 
-            serializers[comboBoxChooseSerializer.SelectedIndex].Serialize(itemList);
-            activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
-            CRUDAssistant.ListRedraw(itemsListView, activeItemList);
+            serializer.Serialize(_itemList, destinationFileName);
+            _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
+            _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
         }
 
         private void buttonLoad_Click(object sender, EventArgs e)
         {
-            if (comboBoxChooseSerializer.Items.Count == 0)
-                return;
 
-            itemList = (List<Object>)serializers[comboBoxChooseSerializer.SelectedIndex].Deserialize(itemList);
-            activeItemList = GetActiveList(itemList, checkBoxFilter.Checked, itemCreator[comboBoxTypes.SelectedIndex]);
-            CRUDAssistant.ListRedraw(itemsListView, activeItemList);
+            string destinationFileName = ChooseFile();
+            ISerializer serializer;
+            if (destinationFileName.Length != 0)
+            {
+                serializer = ChooseSerializer(Path.GetExtension(destinationFileName));
+
+                if (serializer == null)
+                { 
+                    MessageBox.Show("Bad file extension");
+                    return;
+                }
+            }
+            else
+            {
+                MessageBox.Show("ChooseFile File!");
+                return;
+            }
+
+            _itemList = (List<Object>)serializer.Deserialize(destinationFileName);
+            _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
+            _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
         }
     }
 }

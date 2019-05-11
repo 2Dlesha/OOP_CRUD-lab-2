@@ -9,30 +9,28 @@ namespace OOP_CRUD
 {
     public class JojoSerializer : ISerializer
     {
-
-        public string FilePath { get; set; }
-
+    
+        public string FileExtension { get;} = ".jojo";
         public JojoSerializer()
         {
-            FilePath = "CRUD.txtdata";
         }
         
-        public void Serialize(Object itemList)
+        public void Serialize(Object itemList, string fileName)
         {
             string objectInfo = String.Empty;
             JojoFormatter textFormatter = new JojoFormatter();
             objectInfo = textFormatter.GetObjectInfo(itemList);
-            using (StreamWriter streamWriter = new StreamWriter(FilePath))
+            using (StreamWriter streamWriter = new StreamWriter(fileName))
             {
                 streamWriter.Write(objectInfo);
             }
 
         }
 
-        public Object Deserialize(Object itemList)
+        public Object Deserialize(string fileName)
         {
             string objectInfo = String.Empty;
-            using (StreamReader streamReader = new StreamReader(FilePath))
+            using (StreamReader streamReader = new StreamReader(fileName))
             {
                 objectInfo = streamReader.ReadToEnd();
             }

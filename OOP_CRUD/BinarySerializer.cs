@@ -13,27 +13,26 @@ namespace OOP_CRUD
 
     public class BinarySerializer : ISerializer
     {
-        public string FilePath { get; set; }
+        public string FileExtension { get; } = ".dat";
 
         public BinarySerializer()
         {
-            FilePath = "CRUD.dat";
         }
 
-        public void Serialize(Object itemList)
+        public void Serialize(Object itemList, string fileName)
         {
             BinaryFormatter formatter = new BinaryFormatter();
-            using (FileStream fs = new FileStream(FilePath, FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
             {
                 formatter.Serialize(fs, itemList);
             }
         }
 
-        public Object Deserialize(Object itemList)
+        public Object Deserialize(string fileName)
         {
             BinaryFormatter formatter = new BinaryFormatter();
             Object buf = null;
-            using (FileStream fs = new FileStream(FilePath, FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
             {
                 buf = formatter.Deserialize(fs);
             }

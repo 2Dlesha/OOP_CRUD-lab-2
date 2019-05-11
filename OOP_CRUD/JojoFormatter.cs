@@ -14,7 +14,7 @@ namespace OOP_CRUD
         public char _arrayOpenSymbol = '[';
         public char _arrayCloseSymbol = ']';
         public char _objectOpenSymbol = '{';
-        public char _objectCloseSymbol = '}';
+        public char _objectCloseSymbol = '}'; 
         public char _objectDelimeter = ',';
         public string _arrayAttribute = "$values";
         public string _typeAttribute = "$type";
@@ -24,24 +24,24 @@ namespace OOP_CRUD
 
         private string FormatList(Object objectList, string tabs)
         {
-            StringBuilder listBuilder = new StringBuilder();
+            StringBuilder listFormatter = new StringBuilder();
 
-            listBuilder.AppendLine(tabs  +'"' + _arrayAttribute + '"' + ":" + tab + _arrayOpenSymbol);
+            listFormatter.AppendLine(tabs  +'"' + _arrayAttribute + '"' + ":" + tab + _arrayOpenSymbol);
             bool firstFlag = true;
             foreach (object obj in (List<Object>)objectList)
             { 
                 if (firstFlag)
                     firstFlag = false;
                 else
-                    listBuilder.AppendLine(_objectDelimeter.ToString());
+                    listFormatter.AppendLine(_objectDelimeter.ToString());
                 
-                listBuilder.Append(tabs + tab);
-                listBuilder.Append(FormatObject(obj, tabs + tab));
+                listFormatter.Append(tabs + tab);
+                listFormatter.Append(FormatObject(obj, tabs + tab));
             }
-            listBuilder.AppendLine();
-            listBuilder.AppendLine(tabs + _arrayCloseSymbol);
+            listFormatter.AppendLine();
+            listFormatter.AppendLine(tabs + _arrayCloseSymbol);
 
-            return listBuilder.ToString();
+            return listFormatter.ToString();
         }
 
         private int FindID(Object obj)
@@ -64,77 +64,77 @@ namespace OOP_CRUD
 
         private string FormatReference(Object obj, string tabs)
         {
-            StringBuilder referenceBuilder = new StringBuilder();
+            StringBuilder referenceFormatter = new StringBuilder();
 
-            referenceBuilder.AppendLine(_objectOpenSymbol.ToString());
-            referenceBuilder.AppendLine(tabs + tab + _referenceAttribute + ':' + tab + FindID(obj));
-            referenceBuilder.Append(tabs + _objectCloseSymbol);
+            referenceFormatter.AppendLine(_objectOpenSymbol.ToString());
+            referenceFormatter.AppendLine(tabs + tab + '"' + _referenceAttribute + '"' + ':' + tab + FindID(obj));
+            referenceFormatter.Append(tabs + _objectCloseSymbol);
 
-            return referenceBuilder.ToString();
+            return referenceFormatter.ToString();
         }
 
         private string FormatObject(Object obj, string tabs = "")
         {
-            StringBuilder objectBuilder = new StringBuilder();
+            StringBuilder objectFormatter = new StringBuilder();
 
             if (IsAlreadyExist(obj))
                 return FormatReference(obj, tabs);
             else
                 _referenceList.Add(new Container(obj, _idCounter));
 
-            objectBuilder.AppendLine(_objectOpenSymbol.ToString());
-            objectBuilder.AppendLine(tabs + tab + '"' + _typeAttribute + '"' + ":" + tab + '"' + obj.GetType().FullName + '"' + _objectDelimeter);
-            objectBuilder.AppendLine(tabs + tab + '"' + _idAttribute + '"' + ":" + tab + (_idCounter++).ToString() + _objectDelimeter);
+            objectFormatter.AppendLine(_objectOpenSymbol.ToString());
+            objectFormatter.AppendLine(tabs + tab + '"' + _typeAttribute + '"' + ":" + tab + '"' + obj.GetType().FullName + '"' + _objectDelimeter);
+            objectFormatter.AppendLine(tabs + tab + '"' + _idAttribute + '"' + ":" + tab + (_idCounter++).ToString() + _objectDelimeter);
 
             if (obj.GetType().GetInterface("ICollection") != null || (obj.GetType().GetInterface("IEnumerable`1") != null))
-                objectBuilder.Append(FormatList(obj, tabs + tab));
+                objectFormatter.Append(FormatList(obj, tabs + tab));
             else
             {
-                bool firstProp = true;
+                bool firstFlag = true;
                 foreach (var property in obj.GetType().GetProperties())
                 {
-                    if (firstProp)
-                        firstProp = false;
+                    if (firstFlag)
+                        firstFlag = false;
                     else
-                        objectBuilder.AppendLine(_objectDelimeter.ToString());
+                        objectFormatter.AppendLine(_objectDelimeter.ToString());
 
-                    objectBuilder.Append(FormatProperty(property, obj, tabs));
+                    objectFormatter.Append(FormatProperty(property, obj, tabs));
                 }
-                objectBuilder.AppendLine();
+                objectFormatter.AppendLine();
             }
-            objectBuilder.Append(tabs + _objectCloseSymbol);
+            objectFormatter.Append(tabs + _objectCloseSymbol);
 
-            return objectBuilder.ToString();
+            return objectFormatter.ToString();
         }
 
         private string FormatProperty(PropertyInfo property, Object obj, string tabs)
         {
-            StringBuilder propertyBuilder = new StringBuilder();
-            propertyBuilder.Append(tabs + tab + '"' + property.Name + '"' + ':' + tab);
+            StringBuilder propertyFormatter = new StringBuilder();
+            propertyFormatter.Append(tabs + tab + '"' + property.Name + '"' + ':' + tab);
 
             if ((property.PropertyType.IsPrimitive) || (property.PropertyType.IsEnum) || (property.PropertyType == typeof(string)) || (property.PropertyType.IsValueType))
             {
                 if (property.PropertyType == typeof(string))
                 {
-                    propertyBuilder.Append('"' + property.GetValue(obj).ToString() + '"');
+                    propertyFormatter.Append('"' + property.GetValue(obj).ToString() + '"');
                 }
                 else if (property.PropertyType.IsEnum)
                 {
-                    propertyBuilder.Append(((int)property.GetValue(obj)).ToString());
+                    propertyFormatter.Append(((int)property.GetValue(obj)).ToString());
                 }
                 else
-                    propertyBuilder.Append(property.GetValue(obj).ToString());
+                    propertyFormatter.Append(property.GetValue(obj).ToString());
             }
             else if (property.PropertyType.IsClass)
             {
                 object nestedObject = property.GetValue(obj);
                 if (nestedObject != null)
-                    propertyBuilder.Append(FormatObject(nestedObject, tabs + tab));
+                    propertyFormatter.Append(FormatObject(nestedObject, tabs + tab));
                 else
-                    propertyBuilder.Append("null");
+                    propertyFormatter.Append("null");
             }
 
-            return propertyBuilder.ToString();
+            return propertyFormatter.ToString();
         }
 
         public string GetObjectInfo(Object item)

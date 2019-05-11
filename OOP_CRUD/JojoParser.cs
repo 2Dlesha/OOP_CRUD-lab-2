@@ -201,7 +201,6 @@ namespace OOP_CRUD
                 key = key.Trim('"');
                 value = value.Trim('"');
                 SetUpObject(ref container, key, value);
-                //Console.WriteLine(key + ':' + value);
             }
 
             _referenceList.Add(container);
