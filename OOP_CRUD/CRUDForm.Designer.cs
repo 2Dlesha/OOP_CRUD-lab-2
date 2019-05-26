@@ -37,6 +37,7 @@
             this.buttonSave = new System.Windows.Forms.Button();
             this.buttonLoad = new System.Windows.Forms.Button();
             this.comboBoxChooseSerializer = new System.Windows.Forms.ComboBox();
+            this.comboBoxPlugin = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // buttonCreate
@@ -131,11 +132,20 @@
             this.comboBoxChooseSerializer.Size = new System.Drawing.Size(156, 21);
             this.comboBoxChooseSerializer.TabIndex = 10;
             // 
+            // comboBoxPlugin
+            // 
+            this.comboBoxPlugin.FormattingEnabled = true;
+            this.comboBoxPlugin.Location = new System.Drawing.Point(13, 271);
+            this.comboBoxPlugin.Name = "comboBoxPlugin";
+            this.comboBoxPlugin.Size = new System.Drawing.Size(156, 21);
+            this.comboBoxPlugin.TabIndex = 11;
+            // 
             // CRUDForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(481, 269);
+            this.ClientSize = new System.Drawing.Size(481, 299);
+            this.Controls.Add(this.comboBoxPlugin);
             this.Controls.Add(this.comboBoxChooseSerializer);
             this.Controls.Add(this.buttonLoad);
             this.Controls.Add(this.buttonSave);
@@ -164,6 +174,7 @@
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.Button buttonLoad;
         private System.Windows.Forms.ComboBox comboBoxChooseSerializer;
+        private System.Windows.Forms.ComboBox comboBoxPlugin;
     }
 }
 

@@ -14,25 +14,25 @@ namespace OOP_CRUD
         {
         }
 
-        public void Serialize(Object itemList, string fileName)
+        public void Serialize(Object itemList, Stream streamName)
         {
             string jsonObject = JsonConvert.SerializeObject(itemList, Formatting.Indented, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
                 PreserveReferencesHandling = PreserveReferencesHandling.Objects
             });
-
-            using (StreamWriter fs = new StreamWriter(fileName))
+            
+            using (StreamWriter fs = new StreamWriter(streamName))
             {
                 fs.Write(jsonObject);
             }
         }
 
-        public Object Deserialize(string fileName)
+        public Object Deserialize(Stream streamName)
         {
             string jsonObject = String.Empty;
 
-            using (StreamReader fs = new StreamReader(fileName))
+            using (StreamReader fs = new StreamReader(streamName))
             {
                 jsonObject = fs.ReadToEnd();
             }

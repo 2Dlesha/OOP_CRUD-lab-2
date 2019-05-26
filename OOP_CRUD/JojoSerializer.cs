@@ -15,22 +15,22 @@ namespace OOP_CRUD
         {
         }
         
-        public void Serialize(Object itemList, string fileName)
+        public void Serialize(Object itemList, Stream streamName)
         {
             string objectInfo = String.Empty;
             JojoFormatter textFormatter = new JojoFormatter();
             objectInfo = textFormatter.GetObjectInfo(itemList);
-            using (StreamWriter streamWriter = new StreamWriter(fileName))
+            using (StreamWriter streamWriter = new StreamWriter(streamName))
             {
                 streamWriter.Write(objectInfo);
             }
 
         }
 
-        public Object Deserialize(string fileName)
+        public Object Deserialize(Stream streamName)
         {
             string objectInfo = String.Empty;
-            using (StreamReader streamReader = new StreamReader(fileName))
+            using (StreamReader streamReader = new StreamReader(streamName))
             {
                 objectInfo = streamReader.ReadToEnd();
             }

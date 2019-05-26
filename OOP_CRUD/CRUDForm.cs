@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Reflection;
 using System.IO;
+using EncoderPluginInterface;
+using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace OOP_CRUD
 {
@@ -27,6 +30,10 @@ namespace OOP_CRUD
         public List<object> _activeItemList = new List<object>();
         public List<Type> _itemCreator = new List<Type>();
 
+        public string _cipherKey { get; set; }
+
+        public List<IEncoder> _pluginList = new List<IEncoder>();
+
         public CRUDForm(List<Type> availibleTypes, ICRUDHelper CRUDHelper)
         {
             InitializeComponent();
@@ -34,7 +41,11 @@ namespace OOP_CRUD
             //CRUDAssistant.ItemsInit(itemList);
             _activeItemList = _itemList;
             _itemCreator = availibleTypes;
+            _cipherKey = "OOP_1234567890_OOP";
         }
+
+
+
 
         private void CRUDForm_Load(object sender, EventArgs e)
         {
@@ -68,6 +79,30 @@ namespace OOP_CRUD
                 comboBoxChooseSerializer.SelectedIndex = 0;
 
             comboBoxChooseSerializer.DropDownStyle = ComboBoxStyle.DropDownList;
+
+
+           /* AppDomainSetup setup = new AppDomainSetup();
+            setup.ApplicationBase = @"D:\Study\Univesity\4 term\OOP\CRUD\OOP_CRUD-lab-2\OOP_CRUD\bin\Debug";
+
+            AppDomain pluginDomain = AppDomain.CreateDomain("Plugins", null, setup);
+            pluginDomain.DoCallBack(delegate() { LoadPlugins(_pluginList); });*/
+
+            LoadPlugins(_pluginList);
+
+            foreach (var item in _pluginList)
+            {
+                string typeString = item.GetType().Name;
+
+                if (item.GetType().GetCustomAttributes(typeof(DisplayNameAttribute), false).FirstOrDefault() is DisplayNameAttribute displayNameAttribute)
+                    typeString = displayNameAttribute.DisplayName;
+
+                comboBoxPlugin.Items.Add(typeString);
+            }
+
+            if (comboBoxPlugin.Items.Count != 0)
+                comboBoxPlugin.SelectedIndex = 0;
+
+            comboBoxPlugin.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
 
@@ -164,16 +199,40 @@ namespace OOP_CRUD
             return null;
         }
 
+        private IEncoder ChooseDecoder(string ext)
+        {
+            foreach (var encoder in _pluginList)
+            {
+                if (ext == encoder.Expansion)
+                    return encoder;
+            }
+            return null;
+        }
+
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
             string destinationFileName = ChooseFile();
+            
+
+            IEncoder encoder = (comboBoxPlugin.SelectedIndex != -1) ? _pluginList[comboBoxPlugin.SelectedIndex] : null;
+
+            if ((encoder != null) && MessageBox.Show("Шифровать файл?", "", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                encoder = _pluginList[comboBoxPlugin.SelectedIndex];
+            else
+                encoder = null;
+            //
+
             ISerializer serializer = _serializers[comboBoxChooseSerializer.SelectedIndex]; 
             if (destinationFileName.Length != 0)
             {
                 if (serializer.FileExtension != Path.GetExtension(destinationFileName))
                 { 
                     destinationFileName += serializer.FileExtension;
+                }
+                if ( (encoder != null) && encoder.Expansion != Path.GetExtension(destinationFileName))
+                {
+                    destinationFileName += encoder.Expansion;
                 }
             }
             else
@@ -182,7 +241,37 @@ namespace OOP_CRUD
                 return;
             }
 
-            serializer.Serialize(_itemList, destinationFileName);
+            //using (FileStream file = new FileStream(destinationFileName, FileMode.OpenOrCreate))
+            //{
+            if ((encoder != null))
+            {
+                using (FileStream ms = new FileStream("buf.txt", FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
+               // using (FileStream fs = new FileStream(destinationFileName, FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
+                {
+                 //   fs.SetLength(0);
+                    ms.SetLength(0);
+                    serializer.Serialize(_itemList, ms);
+                    //t.EncryptStream(fs, "test12345678901234");
+                //    encoder.EncryptStream(ms, fs, _cipherKey);
+                }
+                using (FileStream ms = new FileStream("buf.txt", FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
+                using (FileStream fs = new FileStream(destinationFileName, FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
+                {
+                    fs.SetLength(0);
+                //    ms.SetLength(0);
+                //    serializer.Serialize(_itemList, ms);
+                    //t.EncryptStream(fs, "test12345678901234");
+                    encoder.EncryptStream(ms, fs, _cipherKey);
+                }
+
+                //serializer.Serialize(_itemList, encoder.EncryptStream(file,_cipherKey));
+            }
+            else
+            {
+                using (FileStream file = new FileStream(destinationFileName, FileMode.OpenOrCreate))
+                    serializer.Serialize(_itemList, file);
+            }
+           //}
             _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
             _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
         }
@@ -192,9 +281,17 @@ namespace OOP_CRUD
 
             string destinationFileName = ChooseFile();
             ISerializer serializer;
+            IEncoder encoder = null;
+
             if (destinationFileName.Length != 0)
             {
+                encoder = ChooseDecoder(Path.GetExtension(destinationFileName));
                 serializer = ChooseSerializer(Path.GetExtension(destinationFileName));
+
+                if (encoder != null)
+                {
+                    serializer = ChooseSerializer(Path.GetExtension(destinationFileName.Replace(encoder.Expansion, "")));
+                }
 
                 if (serializer == null)
                 { 
@@ -208,9 +305,77 @@ namespace OOP_CRUD
                 return;
             }
 
-            _itemList = (List<Object>)serializer.Deserialize(destinationFileName);
+            //using (FileStream file = new FileStream(destinationFileName, FileMode.OpenOrCreate))
+            //{
+            if (encoder != null)
+            {
+                //_itemList = (List<Object>)serializer.Deserialize(encoder.DecryptStream(file, _cipherKey));
+                using (FileStream ms = new FileStream("buf.txt", FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
+                using (FileStream fs = new FileStream(destinationFileName, FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
+                {
+                    //fs.SetLength(0);
+                    ms.SetLength(0);
+                    //serializer.Serialize(_itemList, ms);
+                    //t.EncryptStream(fs, "test12345678901234");
+                    encoder.DecryptStream(fs, ms, _cipherKey);
+                    //_itemList = (List<Object>)serializer.Deserialize(ms);
+                }
+                using (FileStream ms = new FileStream("buf.txt", FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
+                {
+                    _itemList = (List<Object>)serializer.Deserialize(ms);
+                }
+            }
+            else
+            {
+                using (FileStream file = new FileStream(destinationFileName, FileMode.OpenOrCreate))
+                    _itemList = (List<Object>)serializer.Deserialize(file);
+            }
+
+
+              //  _itemList = (List<Object>)serializer.Deserialize(file);
+            //}
+
             _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
             _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
+        }
+
+        public void LoadPlugins(List<IEncoder> pluginList)
+        {
+
+
+
+            var pluginsPath = "Plugins";
+            var files = Directory.GetFiles(pluginsPath, "*.dll");
+
+            foreach (var file in files)
+            {
+                //Console.WriteLine($"Trying load: {file}");
+                Assembly assembly;
+
+                try { assembly = Assembly.LoadFrom(file); }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    continue;
+                }
+
+                var types = assembly.GetTypes().Where(type => type.IsClass && type.GetInterface(nameof(IEncoder)) != null);
+
+                foreach (var type in types)
+                {
+                    var plugin = Activator.CreateInstance(type) as IEncoder;
+
+                    if (plugin == null)
+                    {
+                        Console.WriteLine("Null");
+                        continue;
+                    }
+
+
+                    pluginList.Add(plugin);
+                }
+            }
+
         }
     }
 }

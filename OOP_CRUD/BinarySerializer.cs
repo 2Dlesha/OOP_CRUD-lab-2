@@ -19,23 +19,17 @@ namespace OOP_CRUD
         {
         }
 
-        public void Serialize(Object itemList, string fileName)
+        public void Serialize(Object itemList, Stream streamName)
         {
             BinaryFormatter formatter = new BinaryFormatter();
-            using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
-            {
-                formatter.Serialize(fs, itemList);
-            }
+            formatter.Serialize(streamName, itemList);
         }
 
-        public Object Deserialize(string fileName)
+        public Object Deserialize(Stream streamName)
         {
             BinaryFormatter formatter = new BinaryFormatter();
             Object buf = null;
-            using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
-            {
-                buf = formatter.Deserialize(fs);
-            }
+            buf = formatter.Deserialize(streamName);
 
             return buf;
         }

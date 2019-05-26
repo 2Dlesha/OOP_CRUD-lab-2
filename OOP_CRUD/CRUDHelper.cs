@@ -226,11 +226,28 @@ namespace OOP_CRUD
 
                 Type fieldType = fields[i].PropertyType;
                 //Создание для типов значений текстовых полей ввода и их заполнение
-                if (((fieldType.IsPrimitive) && (!fieldType.IsEnum))  ||  (fieldType == typeof(string)) )
+                if (((fieldType.IsPrimitive) && (!fieldType.IsEnum))  ||  (fieldType == typeof(string))
+                    
+                    
+                    
+                    
+                    
+                    
+                    )
+
+
+
+
+
+
+
+
+
                 {
                     if (fieldType == typeof(bool))
                     {
-                        CheckBox checkBox = CreateCheckBox(fields[i].Name,
+
+                       CheckBox checkBox = CreateCheckBox(fields[i].Name,
                                                             new Point(15 + label.Width,
                                                             controlHeight * (i + 1)),
                                                             (bool)fields[i].GetValue(item));
