@@ -12,6 +12,7 @@ using System.IO;
 using EncoderPluginInterface;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Configuration;
 
 namespace OOP_CRUD
 {
@@ -39,9 +40,12 @@ namespace OOP_CRUD
             InitializeComponent();
             _CRUDAssistant = CRUDHelper;
             //CRUDAssistant.ItemsInit(itemList);
+            var settings = ConfigurationManager.AppSettings;
             _activeItemList = _itemList;
             _itemCreator = availibleTypes;
-            _cipherKey = "OOP_1234567890_OOP";
+            _cipherKey = ConfigurationManager.AppSettings["СipherKey"];
+
+           // _cipherKey = "OOP_1234567890_OOP";
         }
 
 
@@ -241,37 +245,26 @@ namespace OOP_CRUD
                 return;
             }
 
-            //using (FileStream file = new FileStream(destinationFileName, FileMode.OpenOrCreate))
-            //{
             if ((encoder != null))
             {
                 using (FileStream ms = new FileStream("buf.txt", FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
-               // using (FileStream fs = new FileStream(destinationFileName, FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
                 {
-                 //   fs.SetLength(0);
                     ms.SetLength(0);
                     serializer.Serialize(_itemList, ms);
-                    //t.EncryptStream(fs, "test12345678901234");
-                //    encoder.EncryptStream(ms, fs, _cipherKey);
                 }
                 using (FileStream ms = new FileStream("buf.txt", FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
                 using (FileStream fs = new FileStream(destinationFileName, FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
                 {
                     fs.SetLength(0);
-                //    ms.SetLength(0);
-                //    serializer.Serialize(_itemList, ms);
-                    //t.EncryptStream(fs, "test12345678901234");
                     encoder.EncryptStream(ms, fs, _cipherKey);
                 }
 
-                //serializer.Serialize(_itemList, encoder.EncryptStream(file,_cipherKey));
             }
             else
             {
                 using (FileStream file = new FileStream(destinationFileName, FileMode.OpenOrCreate))
                     serializer.Serialize(_itemList, file);
             }
-           //}
             _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
             _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
         }
@@ -305,20 +298,13 @@ namespace OOP_CRUD
                 return;
             }
 
-            //using (FileStream file = new FileStream(destinationFileName, FileMode.OpenOrCreate))
-            //{
             if (encoder != null)
             {
-                //_itemList = (List<Object>)serializer.Deserialize(encoder.DecryptStream(file, _cipherKey));
                 using (FileStream ms = new FileStream("buf.txt", FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
                 using (FileStream fs = new FileStream(destinationFileName, FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
                 {
-                    //fs.SetLength(0);
                     ms.SetLength(0);
-                    //serializer.Serialize(_itemList, ms);
-                    //t.EncryptStream(fs, "test12345678901234");
                     encoder.DecryptStream(fs, ms, _cipherKey);
-                    //_itemList = (List<Object>)serializer.Deserialize(ms);
                 }
                 using (FileStream ms = new FileStream("buf.txt", FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite))
                 {
@@ -331,19 +317,12 @@ namespace OOP_CRUD
                     _itemList = (List<Object>)serializer.Deserialize(file);
             }
 
-
-              //  _itemList = (List<Object>)serializer.Deserialize(file);
-            //}
-
             _activeItemList = GetActiveList(_itemList, checkBoxFilter.Checked, _itemCreator[comboBoxTypes.SelectedIndex]);
             _CRUDAssistant.ListRedraw(itemsListView, _activeItemList);
         }
 
         public void LoadPlugins(List<IEncoder> pluginList)
         {
-
-
-
             var pluginsPath = "Plugins";
             var files = Directory.GetFiles(pluginsPath, "*.dll");
 
@@ -359,9 +338,13 @@ namespace OOP_CRUD
                     continue;
                 }
 
-                var types = assembly.GetTypes().Where(type => type.IsClass && type.GetInterface(nameof(IEncoder)) != null);
+                pluginList = assembly.GetTypes()
+                    .Where(type => type.IsClass && type.GetInterface(nameof(IEncoder)) != null)
+                    .Select(t => Activator.CreateInstance(t))
+                    .Cast<IEncoder>()
+                    .Where(x => x != null).ToList();
 
-                foreach (var type in types)
+                /*foreach (var type in types)
                 {
                     var plugin = Activator.CreateInstance(type) as IEncoder;
 
@@ -373,7 +356,7 @@ namespace OOP_CRUD
 
 
                     pluginList.Add(plugin);
-                }
+                }*/
             }
 
         }
