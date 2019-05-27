@@ -338,13 +338,13 @@ namespace OOP_CRUD
                     continue;
                 }
 
-                pluginList = assembly.GetTypes()
-                    .Where(type => type.IsClass && type.GetInterface(nameof(IEncoder)) != null)
-                    .Select(t => Activator.CreateInstance(t))
-                    .Cast<IEncoder>()
-                    .Where(x => x != null).ToList();
+                var types = assembly.GetTypes()
+                    .Where(type => type.IsClass && type.GetInterface(nameof(IEncoder)) != null);
+                    //.Select(t => Activator.CreateInstance(t))
+                    //.Cast<IEncoder>()
+                    //.Where(x => x != null).ToList();
 
-                /*foreach (var type in types)
+                foreach (var type in types)
                 {
                     var plugin = Activator.CreateInstance(type) as IEncoder;
 
@@ -356,7 +356,7 @@ namespace OOP_CRUD
 
 
                     pluginList.Add(plugin);
-                }*/
+                }
             }
 
         }
